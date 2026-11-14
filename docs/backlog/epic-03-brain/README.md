@@ -7,7 +7,7 @@ The companion reads from and, with approval, writes to a Karpathy-style LLM wiki
 
 | ID | Title | Complexity | Status |
 |----|-------|------------|--------|
-| E3-US01 | Brain repo bootstrap | S | Pending |
+| E3-US01 | Brain repo bootstrap | S | Done |
 | E3-US02 | Domain entities and ports | M | Done |
 | E3-US03 | Wiki use-cases | L | Done |
 | E3-US04 | In-memory and GitHub wiki store adapters | L | Done |

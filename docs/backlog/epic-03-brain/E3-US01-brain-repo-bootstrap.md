@@ -3,17 +3,17 @@
 **User Story**: As the owner, I want a private brain repo with a clear schema so that both the agent and I know how knowledge is organized.
 
 **Acceptance Criteria**:
-- [ ] Private repo `polive106/brain` exists with `AGENTS.md`, `index.md`, `log.md`, `raw/.gitkeep`, `wiki/.gitkeep`
-- [ ] Brain `AGENTS.md` defines:
-  - [ ] page naming (kebab-case slugs under `wiki/`, optional subfolders by kind)
-  - [ ] page frontmatter (title, summary, sources, updated)
-  - [ ] linking rules (relative links to pages and `raw/` sources)
-  - [ ] merge-over-append
-  - [ ] the index line format
-  - [ ] the log line format (`## [YYYY-MM-DD] ingest | <title>`)
-  - [ ] "never store secrets"
-- [ ] A fine-grained token limited to `polive106/brain` with Contents read/write is created by the owner and stored as `BRAIN_GITHUB_TOKEN` in Vercel; it's never committed
-- [ ] `BRAIN_REPO=polive106/brain` and `BRAIN_BRANCH=main` are documented in `AGENTS.md`
+- [x] Private repo `polive106/brain` exists with `AGENTS.md`, `index.md`, `log.md`, `raw/.gitkeep`, `wiki/.gitkeep`
+- [x] Brain `AGENTS.md` defines:
+  - [x] page naming (kebab-case slugs under `wiki/`, optional subfolders by kind)
+  - [x] page frontmatter (title, summary, sources, updated)
+  - [x] linking rules (relative links to pages and `raw/` sources)
+  - [x] merge-over-append
+  - [x] the index line format
+  - [x] the log line format (`## [YYYY-MM-DD] ingest | <title>`)
+  - [x] "never store secrets"
+- [x] A fine-grained token limited to `polive106/brain` with Contents read/write is created by the owner and stored as `BRAIN_GITHUB_TOKEN` in Vercel; it's never committed
+- [x] `BRAIN_REPO=polive106/brain` and `BRAIN_BRANCH=main` are documented in `AGENTS.md`
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -25,9 +25,18 @@
 
 **Complexity**: S
 
-**Status**: Pending
+**Status**: Done
 
-**Notes (2026-11-14)**: the starter files are ready in `agents/companion/agent/lib/starter-brain.ts` (`AGENTS.md` schema, `index.md`, `log.md`, `wiki/welcome.md`, `raw/`), and the in-memory brain already uses them. What's left needs the owner: create the private repo and the fine-grained token, then push these files and set `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`.
+**Notes (2026-11-14)**:
+- **Repo:** `polive106/brain` was created private and bootstrapped from `agents/companion/agent/lib/starter-brain.ts`, the same files that seed the in-memory brain.
+  - Instead of `wiki/.gitkeep`, the bootstrap ships `wiki/welcome.md`, which `index.md` lists.
+- **Token:** created by the owner, limited to the repo, with Contents read/write.
+  - Verified: 200 on `brain`, push permission granted, 404 on `cortex`.
+  - Stored as a sensitive Vercel variable in production and preview, never committed. `BRAIN_REPO` is set there too.
+- **Write path verified on real GitHub** with the real container and `Ingest`, on a throwaway branch that was then deleted:
+  - one commit on top of `main` with the raw source, page, `index.md` and `log.md`;
+  - the page reads back, search finds it, and re-using a raw source is refused.
+- **Production:** reads the real brain. A list-pages turn used exactly 3 GitHub calls with the token.
 
 **Test Scenarios**:
 ```gherkin

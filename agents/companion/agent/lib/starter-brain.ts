@@ -16,6 +16,12 @@ how pages are written. Companion reads them on every turn.
 - \`index.md\` has one line per page and stays in sync with \`wiki/\`.
 - \`log.md\` is an append-only record of every ingest, query, and lint.
 
+## Never store secrets
+
+Never write credentials, tokens, passwords, API keys, private keys, or connection strings to
+any file here, including \`raw/\`. If a source contains one, replace it with \`[redacted]\`
+before saving. That is the only edit a raw source may get.
+
 ## Pages
 
 - Path: \`wiki/<kebab-case-slug>.md\`. Optional subfolders group pages by kind, for example
