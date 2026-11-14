@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ConflictError, InvalidIngestError, InvalidPathError } from "../errors";
 import { FakeWikiStore, fixedClock } from "../testing/fake-wiki-store";
-import { Ingest, type IngestRequest } from "./ingest";
+import { Ingest, type IngestRequest, ingestPaths } from "./ingest";
 
 const BRAIN = {
   "AGENTS.md": "# Schema\n",
@@ -24,6 +24,12 @@ const setup = (files: Record<string, string> = BRAIN) => {
   const store = new FakeWikiStore({ ...files });
   return { store, ingest: new Ingest(store, fixedClock()) };
 };
+
+describe("ingestPaths", () => {
+  it("returns the paths Ingest would write, deriving missing ones from titles", () => {
+    expect(ingestPaths(request())).toEqual(["wiki/deploys.md", "wiki/ci-checks.md"]);
+  });
+});
 
 describe("Ingest", () => {
   it("writes raw/, pages, index.md and log.md in exactly one commit", async () => {

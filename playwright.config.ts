@@ -14,7 +14,8 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: `pnpm exec vercel dev --local --listen ${PORT}`,
-    env: { NEXT_PUBLIC_WEB_CHAT_AGENT: "companion-test" },
+    // The in-memory brain, so E2E never writes to the real brain repo.
+    env: { NEXT_PUBLIC_WEB_CHAT_AGENT: "companion-test", BRAIN_STORE: "memory" },
     url: `http://localhost:${PORT}/eve/companion-test/v1/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

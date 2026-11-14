@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cortex/adapters':
+        specifier: workspace:*
+        version: link:packages/adapters
       '@cortex/domain':
         specifier: workspace:*
         version: link:packages/domain

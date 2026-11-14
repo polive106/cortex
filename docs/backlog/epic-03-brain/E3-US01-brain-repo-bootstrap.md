@@ -27,6 +27,8 @@
 
 **Status**: Pending
 
+**Notes (2026-11-14)**: the starter files are ready in `agents/companion/agent/lib/starter-brain.ts` (`AGENTS.md` schema, `index.md`, `log.md`, `wiki/welcome.md`, `raw/`), and the in-memory brain already uses them. What's left needs the owner: create the private repo and the fine-grained token, then push these files and set `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`.
+
 **Test Scenarios**:
 ```gherkin
 Scenario: Token scope

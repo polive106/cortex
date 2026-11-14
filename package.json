@@ -11,8 +11,8 @@
     "build": "eve build",
     "deploy": "eve deploy",
     "start": "eve start",
-    "eval": "NODE_ENV=development eve eval --agent companion-test",
-    "eval:real": "NODE_ENV=development eve eval --agent companion --strict",
+    "eval": "NODE_ENV=development BRAIN_STORE=memory eve eval --agent companion-test",
+    "eval:real": "NODE_ENV=development BRAIN_STORE=memory eve eval --agent companion --strict",
     "test:e2e": "playwright test",
     "lint": "biome check .",
     "format": "biome check --write .",
@@ -27,6 +27,7 @@
     "dev:all": "vercel dev --local"
   },
   "dependencies": {
+    "@cortex/adapters": "workspace:*",
     "@cortex/domain": "workspace:*",
     "@shadcn/react": "0.3.1",
     "@shikijs/core": "3.23.0",

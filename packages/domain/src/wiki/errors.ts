@@ -30,5 +30,8 @@ export class SourceFetchError extends WikiError {
 /** The brain changed underneath us, or a write would break an invariant (immutable raw/). */
 export class ConflictError extends WikiError {}
 
+/** The brain can't take writes here (for example, not connected to GitHub yet). Not retried. */
+export class ReadOnlyBrainError extends WikiError {}
+
 /** The ingest request itself is malformed (no pages, a page listed twice). */
 export class InvalidIngestError extends WikiError {}

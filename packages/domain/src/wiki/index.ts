@@ -10,13 +10,15 @@ export {
   InvalidIngestError,
   InvalidPathError,
   PageNotFoundError,
+  ReadOnlyBrainError,
   SourceFetchError,
   WikiError,
 } from "./errors";
 export type { Clock } from "./ports/clock";
 export type { FetchedSource, SourceFetcher } from "./ports/source-fetcher";
 export type { CommitResult, WikiFile, WikiStore } from "./ports/wiki-store";
-export { Ingest, type IngestRequest, type IngestResult } from "./use-cases/ingest";
+export { Ingest, type IngestRequest, type IngestResult, ingestPaths } from "./use-cases/ingest";
+export { ListPages } from "./use-cases/list-pages";
 export { type BrainIndex, ReadIndex } from "./use-cases/read-index";
 export { ReadPage } from "./use-cases/read-page";
 export { type SearchHit, SearchWiki } from "./use-cases/search-wiki";

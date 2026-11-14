@@ -129,6 +129,8 @@ pnpm test:watch         # TDD loop
 
 ## Environment variables
 
+Without `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`, the brain is in memory, seeded from `agents/companion/agent/lib/starter-brain.ts`. Hosted builds make that brain read-only, so approved writes can't vanish.
+
 Local values go in the root `.env.local` (gitignored; `eve link` also writes `VERCEL_OIDC_TOKEN` there). Deployed values are Vercel env vars, marked sensitive. Never print them.
 
 | Variable | Where | Purpose |
@@ -136,6 +138,10 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `ANTHROPIC_API_KEY` | local, production, preview | Direct Anthropic model calls and the eval judge (ADR-0010) |
 | `VERCEL_OIDC_TOKEN` | local (written by `eve link`) | Vercel OIDC for local CLI calls to deployments |
 | `ALLOWED_EMAILS` | production, preview | Comma-separated emails allowed into the web UI and the agent. The email must also be verified by Vercel. Missing or empty denies everyone (ADR-0006) |
+| `BRAIN_GITHUB_TOKEN` | local, production, preview | Fine-grained token for `polive106/brain`, Contents read/write (ADR-0005). Read only in `container.ts` |
+| `BRAIN_REPO` | local, production, preview | `owner/repo` of the brain, e.g. `polive106/brain`. With the token, it switches the brain to GitHub |
+| `BRAIN_BRANCH` | optional | Defaults to `main` |
+| `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |
 
 Set a deployed value from `.env.local` without echoing it:

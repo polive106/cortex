@@ -11,8 +11,8 @@ The companion reads from and, with approval, writes to a Karpathy-style LLM wiki
 | E3-US02 | Domain entities and ports | M | Done |
 | E3-US03 | Wiki use-cases | L | Done |
 | E3-US04 | In-memory and GitHub wiki store adapters | L | Done |
-| E3-US05 | Wiki tools with approval on writes | M | Pending |
-| E3-US06 | Recall of AGENTS.md and index.md every turn | M | Pending |
+| E3-US05 | Wiki tools with approval on writes | M | Done |
+| E3-US06 | Recall of AGENTS.md and index.md every turn | M | Done |
 | E3-US07 | URL fetching and pasted-text ingestion | M | Pending |
 | E3-US08 | Citations in answers and the web UI | S | Pending |
 | E3-US09 | Real-model behavior evals | M | Pending |

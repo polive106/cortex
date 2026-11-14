@@ -3,16 +3,16 @@
 **User Story**: As the owner, I want the companion to have only narrow wiki tools, with every write waiting for my approval, so that it can never touch anything but the brain and never writes without consent.
 
 **Acceptance Criteria**:
-- [ ] Tools in `agents/companion/agent/tools/`:
-  - [ ] `list_pages`
-  - [ ] `read_page`
-  - [ ] `search_wiki`
-  - [ ] `write_page`: `{ source, pages[], reason }` → `ProposeIngest` → `ApplyIngest`, with `approval: always()`
-- [ ] Each tool is thin: Zod input, then one use-case, then domain errors mapped to model-readable text
-- [ ] `container.ts` uses `GitHubWikiStore` when `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO` are set, and `InMemoryWikiStore` otherwise; `process.env` is read only here
-- [ ] The approval prompt shows the page paths and the reason
-- [ ] Instructions tell the agent to search before proposing and to prefer updating existing pages
-- [ ] Tool unit tests (95% coverage) plus a `mockModel` flow eval: propose → park → approve → one commit; deny → no commit
+- [x] Tools in `agents/companion/agent/tools/`:
+  - [x] `list_pages`
+  - [x] `read_page`
+  - [x] `search_wiki`
+  - [x] `write_page`: `{ source, pages[], reason }` → `ProposeIngest` → `ApplyIngest`, with `approval: always()`
+- [x] Each tool is thin: Zod input, then one use-case, then domain errors mapped to model-readable text
+- [x] `container.ts` uses `GitHubWikiStore` when `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO` are set, and `InMemoryWikiStore` otherwise; `process.env` is read only here
+- [x] The approval prompt shows the page paths and the reason
+- [x] Instructions tell the agent to search before proposing and to prefer updating existing pages
+- [x] Tool unit tests (95% coverage) plus a `mockModel` flow eval: propose → park → approve → one commit; deny → no commit
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -26,7 +26,15 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
+
+**Notes (2026-11-14)**:
+- **Wiring:** `container.ts` composes stores and use-cases and is the only place that reads `process.env`. The four tools call one use-case each; `list_pages` gets a small `ListPages` use-case for that.
+- **Errors:** `lib/wiki-result.ts` turns domain errors into model-readable results and rethrows anything else.
+- **`write_page`:** its approval prompt reads "Write to the brain: <paths> (<reason>)".
+- **Hosted builds without GitHub settings:** the brain is read-only (`ReadOnlyWikiStore`), so a write is refused instead of vanishing.
+- **`BRAIN_STORE=memory`:** keeps evals and E2E off the real repo.
+- **Flow evals:** they live in `agents/companion-test/evals/flows/write-page-approval.eval.ts`. The test double re-exports companion's real tools, because companion itself runs a real model.
 
 **Test Scenarios**:
 ```gherkin

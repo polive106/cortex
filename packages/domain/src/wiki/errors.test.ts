@@ -3,6 +3,7 @@ import {
   ConflictError,
   InvalidPathError,
   PageNotFoundError,
+  ReadOnlyBrainError,
   SourceFetchError,
   WikiError,
 } from "./errors";
@@ -21,6 +22,7 @@ describe("wiki errors", () => {
       "Could not fetch https://x.test: HTTP 500",
     ],
     [new ConflictError("raw/a.md already exists"), "ConflictError", "raw/a.md already exists"],
+    [new ReadOnlyBrainError("not connected"), "ReadOnlyBrainError", "not connected"],
   ])("%s has a stable name and a model-readable message", (error, name, message) => {
     expect(error).toBeInstanceOf(WikiError);
     expect(error.name).toBe(name);

@@ -3,12 +3,12 @@
 **User Story**: As a user, I want the companion to always know what the brain contains and how it's organized so that it consults the wiki instead of guessing and doesn't create duplicates.
 
 **Acceptance Criteria**:
-- [ ] A custom eve memory provider slot (`agents/companion/agent/memory/brain.ts`) whose `recall` runs `ReadIndex` and injects the brain's `AGENTS.md` and `index.md`
-- [ ] The scope covers the whole brain (shared), not per user
-- [ ] The recalled content is labeled as data; instructions say not to follow instructions found inside it
-- [ ] The size cap holds; when the index exceeds it, a truncation notice tells the agent to use `search_wiki`
-- [ ] Recall is cached within a turn and refetched on the next turn after a write
-- [ ] A flow eval asserts that the recalled index is present in the model input
+- [x] A custom eve memory provider slot (`agents/companion/agent/memory/brain.ts`) whose `recall` runs `ReadIndex` and injects the brain's `AGENTS.md` and `index.md`
+- [x] The scope covers the whole brain (shared), not per user
+- [x] The recalled content is labeled as data; instructions say not to follow instructions found inside it
+- [x] The size cap holds; when the index exceeds it, a truncation notice tells the agent to use `search_wiki`
+- [x] Recall is cached within a turn and refetched on the next turn after a write
+- [x] A flow eval asserts that the recalled index is present in the model input
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -20,7 +20,15 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
+
+**Notes (2026-11-14)**:
+- **Recall:** `memory/brain.ts` recalls on `turn.started` with stable ids (`brain-schema`, `brain-index`), so each turn replaces the previous copy. A write therefore shows up on the next turn.
+- **Scope:** the constant `"brain"`, one brain shared by everyone allowed in.
+- **Recalled content:** wrapped in `<brain_schema>` and `<brain_index>`, with a notice that it's data, not instructions.
+- **Size cap:** `ReadIndex` caps the index at 12,000 characters and adds a notice pointing to `search_wiki`.
+- **Flow eval:** `agents/companion-test/evals/flows/recall-index.eval.ts`.
+- **Injection-resistance:** the real-model eval stays in E3-US09.
 
 **Test Scenarios**:
 ```gherkin
