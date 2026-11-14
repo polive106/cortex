@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { InvalidPagePathError, PagePath } from "./page-path";
+import { InvalidPathError } from "../errors";
+import { PagePath } from "./page-path";
 
 describe("PagePath", () => {
   it("accepts a markdown file under wiki/", () => {
@@ -27,11 +28,11 @@ describe("PagePath", () => {
     ["empty segment", "wiki//page.md"],
     ["bare folder", "wiki/.md"],
   ])("rejects a path %s", (_reason, input) => {
-    expect(() => PagePath.parse(input)).toThrow(InvalidPagePathError);
+    expect(() => PagePath.parse(input)).toThrow(InvalidPathError);
   });
 
   it("rejects a title with no usable characters", () => {
-    expect(() => PagePath.fromTitle("!!!")).toThrow(InvalidPagePathError);
+    expect(() => PagePath.fromTitle("!!!")).toThrow(InvalidPathError);
   });
 
   it("compares by value", () => {

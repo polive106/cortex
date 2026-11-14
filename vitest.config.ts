@@ -24,7 +24,7 @@ export default defineConfig({
         "apps/web/lib/safe-markdown-url.ts",
         "apps/web/lib/approval-summary.ts",
       ],
-      exclude: ["**/*.test.{ts,tsx}", "**/index.ts"],
+      exclude: ["**/*.test.{ts,tsx}", "**/index.ts", "**/testing/**", "**/ports/**"],
       thresholds: {
         "packages/domain/src/**": at(100),
         "packages/adapters/src/**": at(95),

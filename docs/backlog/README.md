@@ -39,7 +39,7 @@ wiki/       pages maintained by the agent
 |------|-------|--------|
 | [E1](./epic-01-foundation/README.md) | Foundation | Done |
 | [E2](./epic-02-companion-web/README.md) | Companion and web chat | Done |
-| [E3](./epic-03-brain/README.md) | Brain (Karpathy LLM wiki) | Pending |
+| [E3](./epic-03-brain/README.md) | Brain (Karpathy LLM wiki) | In Progress |
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
 
 ## Implementation order

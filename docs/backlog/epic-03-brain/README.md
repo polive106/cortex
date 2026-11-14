@@ -8,8 +8,8 @@ The companion reads from and, with approval, writes to a Karpathy-style LLM wiki
 | ID | Title | Complexity | Status |
 |----|-------|------------|--------|
 | E3-US01 | Brain repo bootstrap | S | Pending |
-| E3-US02 | Domain entities and ports | M | Pending |
-| E3-US03 | Wiki use-cases | L | Pending |
+| E3-US02 | Domain entities and ports | M | Done |
+| E3-US03 | Wiki use-cases | L | Done |
 | E3-US04 | In-memory and GitHub wiki store adapters | L | Pending |
 | E3-US05 | Wiki tools with approval on writes | M | Pending |
 | E3-US06 | Recall of AGENTS.md and index.md every turn | M | Pending |
