@@ -47,6 +47,7 @@ import {
   TraceLine,
   TraceTitle,
 } from "@/components/ui/trace";
+import { safeMarkdownUrl } from "@/lib/safe-markdown-url";
 import { cn } from "@/lib/utils";
 
 export type AgentAnswer = {
@@ -113,7 +114,11 @@ function AgentMessagePart({ asks, part }: { readonly asks: Asks; readonly part: 
   switch (part.type) {
     case "text":
       return (
-        <MessageResponse caret="block" isAnimating={part.state === "streaming"}>
+        <MessageResponse
+          caret="block"
+          isAnimating={part.state === "streaming"}
+          urlTransform={safeMarkdownUrl}
+        >
           {part.text}
         </MessageResponse>
       );

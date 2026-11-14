@@ -54,21 +54,22 @@ wiki/       pages maintained by the agent
    - then E1-US06: Vercel link and first deploy (deferred until the Anthropic key is wired)
 8. E2-US03: web channel scaffold and FSD restructure
 9. E2-US04: Vercel sign-in and email allowlist
-10. E2-US05: mockModel flow evals and Playwright E2E setup
-11. E2-US06: approvals UI hook and widget
-12. E3-US01: brain repo bootstrap
-13. E3-US02: domain entities and ports
-14. E3-US03: wiki use-cases
-15. E3-US04: in-memory and GitHub wiki store adapters
-16. E3-US05: wiki tools with approval on writes
-17. E3-US06: recall of AGENTS.md and index.md every turn
-18. E3-US07: URL fetching and pasted-text ingestion
-19. E3-US08: citations in answers and the web UI
-20. E3-US09: real-model behavior evals
-21. E4-US01: Slack channel via Vercel Connect
-22. E4-US02: mentions and DMs
-23. E4-US03: approvals in Slack
-24. E4-US04: "save this thread" ingestion
+10. E2-US07: markdown URL hardening in chat replies (added after the E2-US04 security review)
+11. E2-US05: mockModel flow evals and Playwright E2E setup
+12. E2-US06: approvals UI hook and widget
+13. E3-US01: brain repo bootstrap
+14. E3-US02: domain entities and ports
+15. E3-US03: wiki use-cases
+16. E3-US04: in-memory and GitHub wiki store adapters
+17. E3-US05: wiki tools with approval on writes
+18. E3-US06: recall of AGENTS.md and index.md every turn
+19. E3-US07: URL fetching and pasted-text ingestion
+20. E3-US08: citations in answers and the web UI
+21. E3-US09: real-model behavior evals
+22. E4-US01: Slack channel via Vercel Connect
+23. E4-US02: mentions and DMs
+24. E4-US03: approvals in Slack
+25. E4-US04: "save this thread" ingestion
 
 ## Later / ideas (not yet stories)
 

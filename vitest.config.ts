@@ -10,13 +10,17 @@ const at = (percent: number) => ({
 
 export default defineConfig({
   test: {
-    projects: ["packages/*"],
+    projects: [
+      "packages/*",
+      { test: { name: "web", include: ["apps/web/{lib,app}/**/*.test.{ts,tsx}"] } },
+    ],
     coverage: {
       provider: "v8",
       include: [
         "packages/*/src/**/*.ts",
         "agents/*/agent/tools/**/*.ts",
         "apps/web/src/features/**",
+        "apps/web/lib/safe-markdown-url.ts",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/index.ts"],
       thresholds: {
@@ -24,6 +28,7 @@ export default defineConfig({
         "packages/adapters/src/**": at(95),
         "agents/*/agent/tools/**": at(95),
         "apps/web/src/features/**": at(90),
+        "apps/web/lib/safe-markdown-url.ts": at(100),
       },
     },
   },
