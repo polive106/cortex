@@ -3,12 +3,12 @@
 **User Story**: As the repo owner, I want cortex in a private GitHub repo with CI on every push so that `main` stays green even if a local hook is skipped.
 
 **Acceptance Criteria**:
-- [ ] Private repo `polive106/cortex` exists, with `main` pushed
-- [ ] `.github/workflows/ci.yml` runs on push and pull requests to `main`:
-  - [ ] installs with `--frozen-lockfile`, on Node from `.nvmrc`
-  - [ ] runs `pnpm lint`, `pnpm typecheck`, `pnpm test`
-- [ ] Dependabot is configured for npm and GitHub Actions
-- [ ] The first CI run is green
+- [x] Private repo `polive106/cortex` exists, with `main` pushed
+- [x] `.github/workflows/ci.yml` runs on push and pull requests to `main`:
+  - [x] installs with `--frozen-lockfile`, on Node from `.nvmrc`
+  - [x] runs `pnpm lint`, `pnpm typecheck`, `pnpm test`
+- [x] Dependabot is configured for npm and GitHub Actions
+- [x] CI is green on `main`
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -21,7 +21,7 @@
 
 **Complexity**: S
 
-**Status**: In Progress
+**Status**: Done
 
 **Test Scenarios**:
 ```gherkin

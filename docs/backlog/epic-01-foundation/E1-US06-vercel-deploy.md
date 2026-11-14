@@ -3,8 +3,9 @@
 **User Story**: As the repo owner, I want the scaffolded companion deployed on my personal Vercel account so that the deploy pipeline is proven before features land.
 
 **Acceptance Criteria**:
-- [ ] The Vercel CLI is upgraded from 31.2.2 to a version that supports `vercel connect`
-- [ ] `eve link` connects the repo to a Vercel project under the personal scope (polive106)
+- [x] The Vercel CLI is upgraded from 31.2.2 to a version that supports `vercel connect` (65.16.0, installed under Node 26)
+- [ ] `eve link` connects the repo to a Vercel project under the personal scope `polive106` (not `polive106s-projects`)
+- [ ] The agent uses the owner's Anthropic key, not the AI Gateway, before the first deploy (E2-US02)
 - [ ] `eve deploy` deploys the workspace, and the companion's routes respond at `/eve/companion/v1/*`
 - [ ] Browser requests without auth are rejected; there is no public access
 - [ ] Pushing to `main` triggers a deploy through the GitHub integration
@@ -16,7 +17,7 @@
 | Deploy | First deploy | `eve deploy --non-interactive --yes` |
 | Docs | Document deploy and env vars | `AGENTS.md` (commands section) |
 
-**Dependencies**: E1-US05
+**Dependencies**: E1-US05, E2-US02
 
 **Complexity**: S
 
