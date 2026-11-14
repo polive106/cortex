@@ -31,6 +31,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Button } from "@/components/ui/button";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
+import { replaceSessionRoute } from "@/lib/session-route";
 import { cn } from "@/lib/utils";
 import { AgentMessage } from "./agent-message";
 
@@ -50,16 +51,11 @@ export function AgentChat({
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
   const hasSubmittedMessage = useRef(false);
-  const replaceSessionRoute = (nextSessionId: string) => {
+  const syncSessionRoute = (nextSessionId: string) => {
     if (sessionId !== undefined) return;
     // Framework routers (Next.js, TanStack Router) patch window.history; navigating
     // through them would remount this route and detach the active stream.
-    History.prototype.replaceState.call(
-      window.history,
-      window.history.state,
-      "",
-      `/s/${encodeURIComponent(nextSessionId)}`,
-    );
+    replaceSessionRoute(window, nextSessionId, History.prototype.replaceState.bind(window.history));
   };
   const agent = useEveAgent({
     agent: CHAT_AGENT,
@@ -74,7 +70,7 @@ export function AgentChat({
     resume: sessionId !== undefined,
     onSessionChange(session) {
       if (hasSubmittedMessage.current && session !== undefined) {
-        replaceSessionRoute(session.sessionId);
+        syncSessionRoute(session.sessionId);
       }
     },
   });
@@ -132,7 +128,7 @@ export function AgentChat({
     setHasInputText(false);
     setCancellationError(undefined);
     hasSubmittedMessage.current = true;
-    if (agent.session !== undefined) replaceSessionRoute(agent.session.sessionId);
+    if (agent.session !== undefined) syncSessionRoute(agent.session.sessionId);
     const options = turnOpen ? { turnPolicy: "steer" as const } : undefined;
 
     if (message.files.length === 0) {

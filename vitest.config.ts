@@ -23,6 +23,7 @@ export default defineConfig({
         "apps/web/src/features/**",
         "apps/web/lib/safe-markdown-url.ts",
         "apps/web/lib/approval-summary.ts",
+        "apps/web/lib/session-route.ts",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/index.ts", "**/testing/**", "**/ports/**"],
       thresholds: {
@@ -32,6 +33,7 @@ export default defineConfig({
         "apps/web/src/features/**": at(90),
         "apps/web/lib/safe-markdown-url.ts": at(100),
         "apps/web/lib/approval-summary.ts": at(100),
+        "apps/web/lib/session-route.ts": at(100),
       },
     },
   },
