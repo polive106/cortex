@@ -1,0 +1,12 @@
+. "$(dirname "$0")/_load-node.sh"
+
+# Agent commits (Claude Code sets CLAUDECODE) must carry a simplify marker for this exact index (ADR-0008).
+if [ -n "${CLAUDECODE:-}" ]; then
+  . .claude/hooks/_simplify-lib.sh
+  if [ ! -f "$SIMPLIFY_MARKER" ] || [ "$(staged_hash)" != "$(cat "$SIMPLIFY_MARKER")" ]; then
+    echo "Commit blocked: run the commit skill (/simplify, review, pnpm check, git add, mark-simplified.sh) on exactly what is staged." >&2
+    exit 1
+  fi
+fi
+
+pnpm check

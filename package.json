@@ -7,12 +7,18 @@
     "#evals/*": "./evals/*"
   },
   "scripts": {
+    "dev": "eve dev",
     "build": "eve build",
     "deploy": "eve deploy",
-    "dev": "eve dev",
-    "eval": "eve eval",
     "start": "eve start",
-    "typecheck": "tsc"
+    "eval": "eve eval",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "tsc && pnpm -r typecheck",
+    "test": "vitest run --coverage",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "prepare": "husky",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@vercel/connect": "2.7.0",
@@ -21,11 +27,16 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.7",
     "@types/node": "26.x",
-    "typescript": "7.0.2"
+    "@vitest/coverage-v8": "^5.1.0",
+    "husky": "^9.1.7",
+    "typescript": "7.0.2",
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": "26.x"
-  }
-
+  },
+  "private": true,
+  "packageManager": "pnpm@10.29.3"
 }
