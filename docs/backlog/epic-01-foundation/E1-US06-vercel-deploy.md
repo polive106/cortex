@@ -8,7 +8,7 @@
 - [x] The agent uses the owner's Anthropic key, not the AI Gateway, before the first deploy (E2-US02)
 - [x] `eve deploy` deploys the workspace, and the companion's routes respond at `/eve/companion/v1/*`
 - [x] Browser requests without auth are rejected; there is no public access
-- [ ] Pushing to `main` triggers a deploy through the GitHub integration
+- [x] Pushing to `main` triggers a deploy through the GitHub integration (verified by the push of d6dfea1 on 2026-11-14)
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -21,7 +21,7 @@
 
 **Complexity**: S
 
-**Status**: In Progress
+**Status**: Done
 
 **Test Scenarios**:
 ```gherkin
