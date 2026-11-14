@@ -1,11 +1,12 @@
-import { isAllowedEmail, parseAllowlist } from "@cortex/domain";
+import { isAllowedUser, parseAllowlist, type SignedInUser } from "@cortex/domain";
 import { betterAuth } from "better-auth";
 
-// ADR-0006: only allowlisted emails may use the web UI or reach the agent. Missing means nobody.
+// ADR-0006: only verified, allowlisted emails may use the web UI or reach the agent.
+// A missing ALLOWED_EMAILS means nobody.
 const ALLOWED_EMAILS = parseAllowlist(process.env.ALLOWED_EMAILS);
 
-export function isAllowedSession(session: { readonly user: { readonly email: string } }): boolean {
-  return isAllowedEmail(session.user.email, ALLOWED_EMAILS);
+export function isAllowedSession(session: { readonly user: SignedInUser }): boolean {
+  return isAllowedUser(session.user, ALLOWED_EMAILS);
 }
 
 const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;

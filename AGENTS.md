@@ -127,7 +127,7 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 |----------|-------|---------|
 | `ANTHROPIC_API_KEY` | local, production, preview | Direct Anthropic model calls and the eval judge (ADR-0010) |
 | `VERCEL_OIDC_TOKEN` | local (written by `eve link`) | Vercel OIDC for local CLI calls to deployments |
-| `ALLOWED_EMAILS` | production, preview | Comma-separated emails allowed into the web UI and the agent; missing or empty denies everyone (ADR-0006) |
+| `ALLOWED_EMAILS` | production, preview | Comma-separated emails allowed into the web UI and the agent. The email must also be verified by Vercel. Missing or empty denies everyone (ADR-0006) |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |
 
 Set a deployed value from `.env.local` without echoing it:

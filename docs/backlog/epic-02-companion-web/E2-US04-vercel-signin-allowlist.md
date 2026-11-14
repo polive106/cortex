@@ -14,7 +14,7 @@
 **Technical Tasks**:
 | Layer | Task | File(s) |
 |-------|------|---------|
-| Domain | `isAllowedEmail(email, allowlist)`, `parseAllowlist(raw)` | `packages/domain/src/auth/is-allowed-email.ts` |
+| Domain | `isAllowedUser(user, allowlist)`, `parseAllowlist(raw)` | `packages/domain/src/auth/is-allowed-email.ts` |
 | Agent | Channel auth with the allowlist | `agents/companion/agent/channels/eve.ts` |
 | Web | better-auth config, sign-in slice | `apps/web/src/lib/auth.ts`, `apps/web/src/features/auth-gate/**` |
 | E2E | Signed-out and not-allowed flows | `e2e/tests/auth/*.spec.ts` |
@@ -25,7 +25,7 @@
 
 **Status**: Done
 
-**Note (2026-11-14)**: the Playwright flows in `e2e/tests/auth/` move to E2-US05, which sets up Playwright. Verified by hand on production: `/` shows the sign-in screen, and an anonymous `POST /eve/companion/v1/session` returns 401. `lib/auth.ts` throws on missing auth secrets, and a missing `ALLOWED_EMAILS` denies everyone.
+**Note (2026-11-14)**: the Playwright flows in `e2e/tests/auth/` move to E2-US05, which sets up Playwright. Verified by hand on production: `/` shows the sign-in screen, and an anonymous `POST /eve/companion/v1/session` returns 401. `lib/auth.ts` throws on missing auth secrets, and a missing `ALLOWED_EMAILS` denies everyone. The allowlist also requires the provider's `email_verified` claim (`isAllowedUser`), added after a security review on 2026-11-14.
 
 **Test Scenarios**:
 ```gherkin

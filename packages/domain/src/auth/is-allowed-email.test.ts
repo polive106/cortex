@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAllowedEmail, parseAllowlist } from "./is-allowed-email";
+import { isAllowedUser, parseAllowlist } from "./is-allowed-email";
 
 describe("parseAllowlist", () => {
   it("splits a comma-separated list, trims, lowercases, and drops blanks", () => {
@@ -15,24 +15,29 @@ describe("parseAllowlist", () => {
   });
 });
 
-describe("isAllowedEmail", () => {
+describe("isAllowedUser", () => {
   const allowlist = parseAllowlist("ana@example.com,bob@example.com");
+  const verified = (email: string) => ({ email, emailVerified: true });
 
-  it("allows a listed email, ignoring case and surrounding whitespace", () => {
-    expect(isAllowedEmail("  ANA@example.COM ", allowlist)).toBe(true);
+  it("allows a verified, listed email, ignoring case and surrounding whitespace", () => {
+    expect(isAllowedUser(verified("  ANA@example.COM "), allowlist)).toBe(true);
   });
 
-  it("denies an email that is not listed", () => {
-    expect(isAllowedEmail("eve@example.com", allowlist)).toBe(false);
+  it("denies a listed email that is not verified", () => {
+    expect(isAllowedUser({ email: "ana@example.com", emailVerified: false }, allowlist)).toBe(
+      false,
+    );
+  });
+
+  it("denies a verified email that is not listed", () => {
+    expect(isAllowedUser(verified("eve@example.com"), allowlist)).toBe(false);
   });
 
   it("denies everyone when the allowlist is empty", () => {
-    expect(isAllowedEmail("ana@example.com", [])).toBe(false);
+    expect(isAllowedUser(verified("ana@example.com"), [])).toBe(false);
   });
 
-  it("denies a missing or blank email", () => {
-    expect(isAllowedEmail(undefined, allowlist)).toBe(false);
-    expect(isAllowedEmail(null, allowlist)).toBe(false);
-    expect(isAllowedEmail("  ", allowlist)).toBe(false);
+  it("denies a blank email", () => {
+    expect(isAllowedUser(verified("  "), allowlist)).toBe(false);
   });
 });
