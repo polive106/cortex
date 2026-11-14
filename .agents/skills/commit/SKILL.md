@@ -1,7 +1,6 @@
 ---
 name: commit
 description: The only way to commit in cortex. Runs simplify, review, the deterministic checks, stages explicitly, marks the staged diff as simplified, then commits with a conventional message.
-disable-model-invocation: true
 ---
 
 Husky `pre-commit` blocks every agent commit whose index does not match the marker written by `.claude/hooks/mark-simplified.sh`, and a `PreToolUse` hook stops attempts to skip husky. Follow these steps in order. If **anything** changes after step 5 (a fix, a format, a new file), go back to step 1.

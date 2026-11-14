@@ -22,7 +22,6 @@ Source of truth for every coding agent working in this repo. `CLAUDE.md` imports
 | `discuss-feature` | Exploring a new feature idea before writing stories |
 | `create-story` | Adding stories or epics to the backlog |
 | `review-backlog` | Deciding what to work on next |
-| `implement-story` | Starting work on a backlog story |
 | `scaffold` | Creating ports, adapters, use-cases, eve tools, or FSD slices |
 | `add-unit-tests` | Writing unit or integration tests |
 | `add-e2e-tests` | Writing Playwright E2E tests |

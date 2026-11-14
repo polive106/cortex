@@ -3,7 +3,7 @@
 **User Story**: As a coding agent, I want repeatable workflows (skills) and a structured backlog guarded by hooks so that I always know what to build next and how.
 
 **Acceptance Criteria**:
-- [x] `.agents/skills/` contains `commit`, `implement-story`, `story-complete`, `create-story`, `review-backlog`, `discuss-feature`, `scaffold`, `add-unit-tests`, `add-e2e-tests`, `review`, `debug`, `fix-ci`, `add-adr`, `add-eval`
+- [x] `.agents/skills/` contains `commit`, `story-complete`, `create-story`, `review-backlog`, `discuss-feature`, `scaffold`, `add-unit-tests`, `add-e2e-tests`, `review`, `debug`, `fix-ci`, `add-adr`, `add-eval`
 - [x] `.claude/skills` is a symlink to `../.agents/skills`
 - [x] `docs/backlog/` has the PRD README and epics E1–E4 with stories in the standard format
 - [x] Claude Code hooks ported from ProtoPal:
