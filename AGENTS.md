@@ -118,6 +118,8 @@ pnpm check              # lint + typecheck + test (pre-commit runs this, then pn
 pnpm eval               # deterministic flow evals on companion-test (mockModel, free, no key)
 pnpm eval:real          # real-model evals on companion (Haiku judge; needs ANTHROPIC_API_KEY)
 pnpm test:e2e           # Playwright on vercel dev against companion-test (pre-push runs this)
+# eval scripts set NODE_ENV=development: eve evals run a local dev server, and the generated
+# apps/web/lib/auth.ts fails closed at import time outside development.
 pnpm test:watch         # TDD loop
 ```
 
