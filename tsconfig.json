@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.base.json",
-  "include": ["agents/**/*.ts", "evals/**/*.ts"]
+  "include": ["agents/**/*.ts", "evals/**/*.ts", "e2e/**/*.ts", "playwright.config.ts", "vercel.ts"]
 }

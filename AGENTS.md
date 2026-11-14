@@ -114,10 +114,16 @@ pnpm lint               # Biome (lint + format check + import boundaries)
 pnpm format             # Biome, applying fixes
 pnpm typecheck          # tsc for agents + every package
 pnpm test               # Vitest (root config, all projects) with coverage thresholds
-pnpm check              # lint + typecheck + test (what pre-commit runs)
-pnpm eval               # eve eval for companion (real model + Haiku judge; needs ANTHROPIC_API_KEY)
+pnpm check              # lint + typecheck + test (pre-commit runs this, then pnpm eval)
+pnpm eval               # deterministic flow evals on companion-test (mockModel, free, no key)
+pnpm eval:real          # real-model evals on companion (Haiku judge; needs ANTHROPIC_API_KEY)
+pnpm test:e2e           # Playwright on vercel dev against companion-test (pre-push runs this)
 pnpm test:watch         # TDD loop
 ```
+
+## Test agent
+
+`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channel and has a scripted `demo_action` tool behind `approval: always()`. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
 
 ## Environment variables
 

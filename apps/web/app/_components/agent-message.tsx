@@ -47,6 +47,7 @@ import {
   TraceLine,
   TraceTitle,
 } from "@/components/ui/trace";
+import { approvalDetails } from "@/lib/approval-summary";
 import { safeMarkdownUrl } from "@/lib/safe-markdown-url";
 import { cn } from "@/lib/utils";
 
@@ -70,10 +71,16 @@ type Step = Extract<EveMessagePart, { type: "reasoning" | "tool" }>;
 export function AgentMessage({
   message,
   view,
+  testId,
   ...asks
-}: Asks & { readonly message: EveMessage; readonly view: SessionView }) {
+}: Asks & {
+  readonly message: EveMessage;
+  readonly testId?: string;
+  readonly view: SessionView;
+}) {
   return (
     <Message
+      data-testid={testId}
       data-optimistic={message.metadata?.optimistic ? "true" : undefined}
       from={message.role}
     >
@@ -563,18 +570,37 @@ function InteractionActions({
   const selectedOption = interaction.request.options?.find(
     (option) => option.id === answer?.optionId,
   );
+  const details = approvalDetails(interaction.call);
 
   return (
-    <div className="space-y-3 rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3">
-      <p className="text-muted-foreground text-sm">{interaction.request.prompt}</p>
+    <div
+      className="space-y-3 rounded-md border border-yellow-500/30 bg-yellow-500/5 p-3"
+      data-testid="chat-card-approval"
+    >
+      <p className="text-muted-foreground text-sm" data-testid="chat-text-approval-prompt">
+        {interaction.request.prompt}
+      </p>
+      {details.length > 0 ? (
+        <ul
+          className="space-y-0.5 font-mono text-muted-foreground text-xs"
+          data-testid="chat-list-approval-input"
+        >
+          {details.map((detail) => (
+            <li className="break-all" key={detail}>
+              {detail}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {answer ? (
-        <p className="font-medium text-sm">
+        <p className="font-medium text-sm" data-testid="chat-text-approval-result">
           Responded: {selectedOption?.label ?? answer.text ?? answer.optionId}
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">
           {interaction.request.options?.map((option, index) => (
             <Button
+              data-testid={`chat-btn-${option.id}`}
               disabled={!asks.canRespond(interaction.interactionId)}
               key={option.id}
               onClick={() => {

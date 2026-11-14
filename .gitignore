@@ -9,3 +9,6 @@ dist
 .DS_Store
 *.tsbuildinfo
 coverage
+apps/web/next-env.d.ts
+test-results
+playwright-report

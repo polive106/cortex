@@ -8,6 +8,6 @@ A real companion you can talk to in a private web UI: persona and instructions, 
 | E2-US02 | Anthropic credentials and prompt caching verification | S | Done |
 | E2-US03 | Web channel scaffold and FSD restructure | L | Done |
 | E2-US04 | Vercel sign-in and email allowlist | M | Done |
-| E2-US05 | mockModel flow evals and Playwright E2E setup | M | Pending |
-| E2-US06 | Approvals UI hook and widget | M | Pending |
+| E2-US05 | mockModel flow evals and Playwright E2E setup | M | Done |
+| E2-US06 | Approvals UI hook and widget | M | Done |
 | E2-US07 | Markdown URL hardening in chat replies | S | Done |

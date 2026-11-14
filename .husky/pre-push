@@ -1,0 +1,4 @@
+. "$(dirname "$0")/_load-node.sh"
+
+# Browser E2E against the mockModel double, through the local Vercel service graph (E2-US05).
+pnpm test:e2e

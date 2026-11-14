@@ -9,7 +9,7 @@ Husky `pre-commit` blocks every agent commit whose index does not match the mark
 
 1. **Simplify**: run the `simplify` skill on the pending changes. Apply its fixes.
 2. **Review**: run the `review` skill. Fix every unchecked item or explain to the user why it doesn't apply.
-3. **Check**: `pnpm check` (Biome lint, typecheck, unit tests with coverage thresholds). This is exactly what husky pre-commit runs, so fix failures now.
+3. **Check**: `pnpm check` (Biome lint, typecheck, unit tests with coverage thresholds) and `pnpm eval` (deterministic flow evals). Husky pre-commit runs both, so fix failures now.
 4. **Stage explicitly**: `git add <path> <path> …`. Never `git add -A` / `git add .` blindly; inspect `git status` and stage only files that belong to this logical change.
 5. **Mark**: `.claude/hooks/mark-simplified.sh` (records the sha of `git diff --cached`).
 6. **Commit**:

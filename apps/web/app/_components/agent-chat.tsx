@@ -35,7 +35,10 @@ import { cn } from "@/lib/utils";
 import { AgentMessage } from "./agent-message";
 
 const DEFAULT_AGENT_NAME = "eve-agent";
-const AGENT_NAME = WEB_CHAT_AGENT ?? DEFAULT_AGENT_NAME;
+// E2E points the UI at the mockModel double. eve's installer rewrites eve-agent.ts, so the
+// override lives here.
+const CHAT_AGENT = process.env.NEXT_PUBLIC_WEB_CHAT_AGENT ?? WEB_CHAT_AGENT;
+const AGENT_NAME = CHAT_AGENT ?? DEFAULT_AGENT_NAME;
 
 export function AgentChat({
   sessionId,
@@ -59,7 +62,7 @@ export function AgentChat({
     );
   };
   const agent = useEveAgent({
-    agent: WEB_CHAT_AGENT,
+    agent: CHAT_AGENT,
     prewarm: hasInputText,
     initialSession:
       sessionId === undefined
@@ -85,6 +88,8 @@ export function AgentChat({
   const isPendingAssistantShell =
     lastMessage?.role === "assistant" && lastMessage.parts.length === 0;
   const now = activity(agent.view);
+  // An open approval or question: the turn waits on the person, so say so in the composer.
+  const waitingOnYou = now.kind === "waiting-on-interaction";
   // Show what the agent is doing until its message has something to show, unless it waits on you.
   const showPendingThinking =
     isBusy &&
@@ -154,9 +159,10 @@ export function AgentChat({
   const composer = (
     <PromptInput onSubmit={handleSubmit}>
       <PromptInputTextarea
+        data-testid="chat-input-message"
         disabled={isResuming}
         onChange={(event) => setHasInputText(event.currentTarget.value.trim().length > 0)}
-        placeholder="Send a message…"
+        placeholder={waitingOnYou ? "Waiting for your answer…" : "Send a message…"}
       />
       <ComposerAction
         hasInputText={hasInputText}
@@ -186,11 +192,12 @@ export function AgentChat({
         >
           <ConversationTopFade className="top-14" />
           <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
-            {agent.messages.map((message) =>
+            {agent.messages.map((message, index) =>
               showPendingThinking &&
               isPendingAssistantShell &&
               message.id === lastMessage.id ? null : (
                 <AgentMessage
+                  testId={`chat-row-message-${index}`}
                   canRespond={canRespond}
                   key={message.id}
                   message={message}
@@ -248,7 +255,7 @@ function ComposerAction({
   const canSubmit = hasInputText || attachments.files.length > 0;
 
   if (!canCancel || canSubmit) {
-    return <PromptInputSubmit disabled={isResuming} />;
+    return <PromptInputSubmit data-testid="chat-btn-send" disabled={isResuming} />;
   }
 
   return (

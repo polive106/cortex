@@ -12,3 +12,5 @@ fi
 # Fail fast on lockfile drift, exactly as CI's frozen install would (0.25s, touches nothing).
 pnpm install --frozen-lockfile --lockfile-only --silent
 pnpm check
+# Deterministic flow evals against the mockModel double (E2-US05): free, no API key.
+pnpm eval
