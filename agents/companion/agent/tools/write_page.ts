@@ -49,7 +49,11 @@ export default defineTool({
   inputSchema,
   approval: {
     request: always(),
-    prompt: ({ input }) => `Write to the brain: ${describeTargets(input.pages)} (${input.reason})`,
+    // The card also lists every input field in full; this line is the at-a-glance summary.
+    prompt: ({ input }) =>
+      `Write to the brain: ${describeTargets(input.pages)} (${input.reason}). Pages: ${input.pages
+        .map((page) => `${page.title} — ${page.summary}`)
+        .join("; ")}`,
   },
   async execute({ source, pages }) {
     return wikiResult(async () => {

@@ -1,22 +1,31 @@
 import type { AskedCall } from "eve/react";
 
-const MAX_VALUE_LENGTH = 120;
+const MAX_PREVIEW_LENGTH = 120;
 
-const truncate = (value: string) =>
-  value.length > MAX_VALUE_LENGTH ? `${value.slice(0, MAX_VALUE_LENGTH - 1)}…` : value;
+export interface ApprovalDetail {
+  readonly key: string;
+  /** One line, cut to fit the card. */
+  readonly preview: string;
+  /** The whole value (nested values pretty-printed), so the approver can see what will run. */
+  readonly full: string;
+  readonly truncated: boolean;
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
 /**
- * One "key: value" line per input field of the call an approval would run. eve's prompt already
- * names the tool, so the card shows only what the call would do.
+ * One entry per input field of the call an approval would run. eve's prompt already names the
+ * tool. The card shows each field's preview and lets the approver expand the full value.
  */
-export function approvalDetails(call: AskedCall | undefined): string[] {
+export function approvalDetails(call: AskedCall | undefined): ApprovalDetail[] {
   const input = call?.input;
   if (!isRecord(input)) return [];
   return Object.entries(input).map(([key, value]) => {
-    const text = typeof value === "string" ? value : JSON.stringify(value);
-    return `${key}: ${truncate(text)}`;
+    const line = typeof value === "string" ? value : JSON.stringify(value);
+    const full = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    const truncated = line.length > MAX_PREVIEW_LENGTH;
+    const preview = truncated ? `${line.slice(0, MAX_PREVIEW_LENGTH - 1)}…` : line;
+    return { key, preview, full, truncated };
   });
 }

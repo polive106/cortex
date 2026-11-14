@@ -586,8 +586,19 @@ function InteractionActions({
           data-testid="chat-list-approval-input"
         >
           {details.map((detail) => (
-            <li className="break-all" key={detail}>
-              {detail}
+            <li className="break-all" key={detail.key}>
+              {detail.truncated ? (
+                <details>
+                  <summary className="cursor-pointer">
+                    {detail.key}: {detail.preview}
+                  </summary>
+                  <pre className="mt-1 max-h-80 overflow-auto whitespace-pre-wrap rounded bg-muted p-2">
+                    {detail.full}
+                  </pre>
+                </details>
+              ) : (
+                `${detail.key}: ${detail.preview}`
+              )}
             </li>
           ))}
         </ul>

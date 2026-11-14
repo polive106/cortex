@@ -75,15 +75,15 @@ describe("wiki tools", () => {
       prompt: (args: { input: Note }) => string;
     };
     expect(approval.prompt({ input: note })).toBe(
-      "Write to the brain: wiki/deploys.md (New deploy process)",
+      "Write to the brain: wiki/deploys.md (New deploy process). Pages: Deploys — How we ship",
     );
     expect(
       approval.prompt({ input: { ...note, pages: [{ ...deploys, path: "AGENTS.md" }] } }),
     ).toBe(
-      'Write to the brain: (Invalid path "AGENTS.md": must live under wiki/) (New deploy process)',
+      'Write to the brain: (Invalid path "AGENTS.md": must live under wiki/) (New deploy process). Pages: Deploys — How we ship',
     );
     expect(approval.prompt({ input: { ...note, pages: [{ ...deploys, title: "!!!" }] } })).toBe(
-      'Write to the brain: (Invalid path "wiki/.md": segments must be lowercase kebab-case) (New deploy process)',
+      'Write to the brain: (Invalid path "wiki/.md": segments must be lowercase kebab-case) (New deploy process). Pages: !!! — How we ship',
     );
   });
 });
