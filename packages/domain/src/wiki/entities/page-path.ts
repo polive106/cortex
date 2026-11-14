@@ -3,6 +3,10 @@ import { KEBAB, slugify } from "./text";
 
 const SEGMENT = new RegExp(`^${KEBAB}$`);
 
+/** Whether a stored file is a wiki page: a `.md` file under `wiki/` (looser than PagePath). */
+export const isPagePath = (path: string): boolean =>
+  path.startsWith("wiki/") && path.endsWith(".md");
+
 /** A validated location of a wiki page: `wiki/<kebab-segments>.md`. Nothing escapes `wiki/`. */
 export class PagePath {
   private constructor(readonly value: string) {}

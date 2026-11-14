@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "@cortex/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "msw": "^3.0.5"
   }
 }

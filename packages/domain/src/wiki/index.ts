@@ -1,7 +1,7 @@
 export { Changeset, type FileWrite } from "./entities/changeset";
 export { LogEntry, type LogEntryProps, type LogOperation } from "./entities/log-entry";
 export { Page, type PageProps } from "./entities/page";
-export { PagePath } from "./entities/page-path";
+export { isPagePath, PagePath } from "./entities/page-path";
 export { Source, type SourceProps } from "./entities/source";
 export { SourcePath } from "./entities/source-path";
 export { IndexEntry, type IndexEntryProps, WikiIndex } from "./entities/wiki-index";

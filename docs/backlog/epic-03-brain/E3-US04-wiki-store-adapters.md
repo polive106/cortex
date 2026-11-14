@@ -3,16 +3,16 @@
 **User Story**: As a developer, I want a real GitHub-backed store and an in-memory twin with identical behavior so that local dev and tests never need the real brain.
 
 **Acceptance Criteria**:
-- [ ] `InMemoryWikiStore` implements `WikiStore` and can be seeded from a fixture folder or object
-- [ ] `GitHubWikiStore({ token, owner, repo, branch })` implements `WikiStore` with the GitHub REST API:
-  - [ ] reads contents
-  - [ ] lists the tree
-  - [ ] searches by listing plus a content scan
-  - [ ] commits a whole `Changeset` as **one commit** (blobs → tree → commit → update ref)
-- [ ] Ref update conflicts (main moved) retry once by rebuilding on the new head, then raise `ConflictError`
-- [ ] A shared contract test `describeWikiStoreContract` passes for both adapters; GitHub is faked with msw
-- [ ] The token comes only from the constructor; it's never logged or put in error messages
-- [ ] 95% coverage
+- [x] `InMemoryWikiStore` implements `WikiStore` and can be seeded from a fixture folder or object
+- [x] `GitHubWikiStore({ token, owner, repo, branch })` implements `WikiStore` with the GitHub REST API:
+  - [x] reads contents
+  - [x] lists the tree
+  - [x] searches by listing plus a content scan
+  - [x] commits a whole `Changeset` as **one commit** (blobs → tree → commit → update ref)
+- [x] Ref update conflicts (main moved) retry once by rebuilding on the new head, then raise `ConflictError`
+- [x] A shared contract test `describeWikiStoreContract` passes for both adapters; GitHub is faked with msw
+- [x] The token comes only from the constructor; it's never logged or put in error messages
+- [x] 95% coverage
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -25,7 +25,14 @@
 
 **Complexity**: L
 
-**Status**: Pending
+**Status**: Done
+
+**Notes (2026-11-14)**:
+- **Tree building:** the GitHub store creates the tree with inline `content` instead of separate blob calls. It's still one tree, one commit, and one ref update.
+- **Retries:** when `main` moves, the store raises `ConflictError` rather than replaying the same blobs on the new head, which would drop a concurrent ingest's index or log lines. `Ingest` re-reads, re-plans, and retries once (E3-US03), which covers "retry once by rebuilding on the new head" one layer up.
+- **`mustNotExist` writes:** checked against the head tree before the commit is created.
+- **Token:** it lives in a private field and only goes into the `Authorization` header. Errors name the method, route and status.
+- **Truncated trees:** if GitHub truncates the tree listing, the store fails loudly.
 
 **Test Scenarios**:
 ```gherkin

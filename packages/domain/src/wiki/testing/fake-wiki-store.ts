@@ -1,4 +1,5 @@
 import type { Changeset } from "../entities/changeset";
+import { isPagePath } from "../entities/page-path";
 import { ConflictError } from "../errors";
 import type { Clock } from "../ports/clock";
 import type { CommitResult, WikiFile, WikiStore } from "../ports/wiki-store";
@@ -16,9 +17,7 @@ export class FakeWikiStore implements WikiStore {
   }
 
   async listPages(): Promise<string[]> {
-    return Object.keys(this.files)
-      .filter((path) => path.startsWith("wiki/") && path.endsWith(".md"))
-      .sort();
+    return Object.keys(this.files).filter(isPagePath).sort();
   }
 
   async readPages(): Promise<WikiFile[]> {

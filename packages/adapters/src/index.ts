@@ -1,2 +1,6 @@
-// Adapters implementing @cortex/domain ports land here in E3 (see docs/backlog/epic-03-brain).
-export {};
+export {
+  GitHubApiError,
+  GitHubWikiStore,
+  type GitHubWikiStoreOptions,
+} from "./github-wiki-store/github-wiki-store";
+export { InMemoryWikiStore } from "./in-memory-wiki-store/in-memory-wiki-store";

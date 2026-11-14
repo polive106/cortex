@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InvalidPathError } from "../errors";
-import { PagePath } from "./page-path";
+import { isPagePath, PagePath } from "./page-path";
 
 describe("PagePath", () => {
   it("accepts a markdown file under wiki/", () => {
@@ -33,6 +33,12 @@ describe("PagePath", () => {
 
   it("rejects a title with no usable characters", () => {
     expect(() => PagePath.fromTitle("!!!")).toThrow(InvalidPathError);
+  });
+
+  it("tells stored wiki pages from other files", () => {
+    expect(isPagePath("wiki/a/b.md")).toBe(true);
+    expect(isPagePath("wiki/a.txt")).toBe(false);
+    expect(isPagePath("raw/a.md")).toBe(false);
   });
 
   it("compares by value", () => {
