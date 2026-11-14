@@ -9,4 +9,4 @@ Make the repo fully agentic before any feature work: workspace and tooling, dete
 | E1-US03 | AGENTS.md, CLAUDE.md, and ADRs 0001–0009 | M | Done |
 | E1-US04 | Skills, backlog, and doc-sync hooks | M | Done |
 | E1-US05 | GitHub repo and CI workflow | S | Done |
-| E1-US06 | Vercel link and first deploy (deferred until after E2-US02) | S | Pending |
+| E1-US06 | Vercel link and first deploy (deferred until after E2-US02) | S | In Progress |

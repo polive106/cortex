@@ -15,3 +15,4 @@ We use the [MADR](https://adr.github.io/madr/) format. **Read the relevant ADRs 
 | [0007](./0007-testing-strategy.md) | Testing strategy, coverage thresholds, and mockModel tiers | Accepted |
 | [0008](./0008-simplify-before-commit.md) | Simplify before every agent commit | Accepted |
 | [0009](./0009-tooling-biome-pnpm.md) | Tooling: pnpm workspaces without Turbo, Biome, Node 26 | Accepted |
+| [0010](./0010-direct-anthropic-model-routing.md) | Direct Anthropic model routing on the owner's key | Accepted |

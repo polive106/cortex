@@ -3,11 +3,11 @@
 **User Story**: As the owner paying for tokens, I want the companion to use my Anthropic API key with prompt caching on so that repeated context (instructions, brain schema, index) costs much less.
 
 **Acceptance Criteria**:
-- [ ] How eve routes `anthropic/*` models with an `ANTHROPIC_API_KEY` (direct or through AI Gateway) is documented, from the eve docs and a verified run
-- [ ] `ANTHROPIC_API_KEY` is set in Vercel (production and preview) and in a local `.env.local` (gitignored), never committed
-- [ ] Prompt caching is verified: a second turn shows cached input tokens in eve's usage events or traces
-- [ ] If caching is off by default, the agent config enables it and an ADR records how
-- [ ] `AGENTS.md` lists the required environment variables
+- [x] How eve routes `anthropic/*` models with an `ANTHROPIC_API_KEY` (direct or through AI Gateway) is documented, from the eve docs and a verified run
+- [x] `ANTHROPIC_API_KEY` is set in Vercel (production and preview) and in a local `.env.local` (gitignored), never committed
+- [x] Prompt caching is verified: a second turn shows cached input tokens in eve's usage events or traces
+- [x] If caching is off by default, the agent config enables it and an ADR records how (it's on by default; ADR-0010 records direct routing and the measured cache hit)
+- [x] `AGENTS.md` lists the required environment variables
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -19,7 +19,7 @@
 
 **Complexity**: S
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 ```gherkin

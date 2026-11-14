@@ -4,9 +4,9 @@ A real companion you can talk to in a private web UI: persona and instructions, 
 
 | ID | Title | Complexity | Status |
 |----|-------|------------|--------|
-| E2-US01 | Companion instructions and persona | S | Pending |
-| E2-US02 | Anthropic credentials and prompt caching verification | S | Pending |
-| E2-US03 | Web channel scaffold and FSD restructure | L | Pending |
-| E2-US04 | Vercel sign-in and email allowlist | M | Pending |
+| E2-US01 | Companion instructions and persona | S | Done |
+| E2-US02 | Anthropic credentials and prompt caching verification | S | Done |
+| E2-US03 | Web channel scaffold and FSD restructure | L | Done |
+| E2-US04 | Vercel sign-in and email allowlist | M | Done |
 | E2-US05 | mockModel flow evals and Playwright E2E setup | M | Pending |
 | E2-US06 | Approvals UI hook and widget | M | Pending |

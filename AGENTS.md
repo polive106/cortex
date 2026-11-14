@@ -108,15 +108,37 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 ```bash
 nvm use                 # Node 26 (.nvmrc)
 pnpm install
+pnpm dev:all            # web app + agent locally (no sign-in in dev)
 pnpm dev                # eve dev server + TUI (use `pnpm exec eve dev --no-ui` from scripts/agents)
 pnpm lint               # Biome (lint + format check + import boundaries)
 pnpm format             # Biome, applying fixes
 pnpm typecheck          # tsc for agents + every package
 pnpm test               # Vitest (root config, all projects) with coverage thresholds
 pnpm check              # lint + typecheck + test (what pre-commit runs)
-pnpm eval               # eve eval
+pnpm eval               # eve eval for companion (real model + Haiku judge; needs ANTHROPIC_API_KEY)
 pnpm test:watch         # TDD loop
 ```
+
+## Environment variables
+
+Local values go in the root `.env.local` (gitignored; `eve link` also writes `VERCEL_OIDC_TOKEN` there). Deployed values are Vercel env vars, marked sensitive. Never print them.
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `ANTHROPIC_API_KEY` | local, production, preview | Direct Anthropic model calls and the eval judge (ADR-0010) |
+| `VERCEL_OIDC_TOKEN` | local (written by `eve link`) | Vercel OIDC for local CLI calls to deployments |
+| `ALLOWED_EMAILS` | production, preview | Comma-separated emails allowed into the web UI and the agent; missing or empty denies everyone (ADR-0006) |
+| `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |
+
+Set a deployed value from `.env.local` without echoing it:
+`grep '^NAME=' .env.local | cut -d= -f2- | tr -d '"\n' | vercel env add NAME --environment production --sensitive --force --yes`
+
+## Deployment
+
+- The Vercel project `cortex` is in the `polive106s-projects` scope; `eve link` set it up and connected the GitHub repo.
+- Production is at https://cortex-phi-bay.vercel.app, and companion's routes are under `/eve/companion/v1/*`.
+- `pnpm exec eve deploy --non-interactive --yes` from the root deploys every workspace member. Pushing to `main` also deploys.
+- After a deploy or an env change, run the smoke eval against production from `agents/companion/`: `pnpm exec eve eval smoke --url https://cortex-phi-bay.vercel.app/eve/companion`.
 
 ## Working with eve
 

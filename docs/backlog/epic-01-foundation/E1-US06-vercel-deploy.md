@@ -4,10 +4,10 @@
 
 **Acceptance Criteria**:
 - [x] The Vercel CLI is upgraded from 31.2.2 to a version that supports `vercel connect` (65.16.0, installed under Node 26)
-- [ ] `eve link` connects the repo to a Vercel project under the personal scope `polive106` (not `polive106s-projects`)
-- [ ] The agent uses the owner's Anthropic key, not the AI Gateway, before the first deploy (E2-US02)
-- [ ] `eve deploy` deploys the workspace, and the companion's routes respond at `/eve/companion/v1/*`
-- [ ] Browser requests without auth are rejected; there is no public access
+- [x] `eve link` connects the repo to a Vercel project in the owner's personal hobby scope, `polive106s-projects` (Vercel refuses the bare personal account `polive106` as a scope; the owner approved this on 2026-11-14)
+- [x] The agent uses the owner's Anthropic key, not the AI Gateway, before the first deploy (E2-US02)
+- [x] `eve deploy` deploys the workspace, and the companion's routes respond at `/eve/companion/v1/*`
+- [x] Browser requests without auth are rejected; there is no public access
 - [ ] Pushing to `main` triggers a deploy through the GitHub integration
 
 **Technical Tasks**:
@@ -21,7 +21,7 @@
 
 **Complexity**: S
 
-**Status**: Pending
+**Status**: In Progress
 
 **Test Scenarios**:
 ```gherkin

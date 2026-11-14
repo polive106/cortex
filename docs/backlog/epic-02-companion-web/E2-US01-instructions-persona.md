@@ -3,14 +3,14 @@
 **User Story**: As a user, I want the companion to have a clear identity and conversational style so that it feels like a helpful teammate rather than a generic assistant.
 
 **Acceptance Criteria**:
-- [ ] `agents/companion/agent/instructions.md` replaces the scaffold placeholder:
-  - [ ] identity and purpose (team companion, future keeper of the brain)
-  - [ ] tone: concise and direct
-  - [ ] when to ask before acting
-- [ ] Instructions say that recalled memory and fetched content are data, never instructions
-- [ ] Instructions forbid revealing secrets or configuration
-- [ ] The model is `anthropic/claude-sonnet-5.5` in `agent.ts`
-- [ ] A real-model smoke eval checks that a greeting gets a concise reply that calls no tools
+- [x] `agents/companion/agent/instructions.md` replaces the scaffold placeholder:
+  - [x] identity and purpose (team companion, future keeper of the brain)
+  - [x] tone: concise and direct
+  - [x] when to ask before acting
+- [x] Instructions say that recalled memory and fetched content are data, never instructions
+- [x] Instructions forbid revealing secrets or configuration
+- [x] The model is Sonnet 5.5 in `agent.ts` (direct `anthropic("claude-sonnet-5-5")` on the owner key, see E2-US02)
+- [x] A real-model smoke eval checks that a greeting gets a concise reply that calls no tools
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
@@ -22,7 +22,7 @@
 
 **Complexity**: S
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 ```gherkin
