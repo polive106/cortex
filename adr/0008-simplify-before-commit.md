@@ -26,6 +26,7 @@ Three layers:
 ### Negative
 - Only commits made through Claude Code are gated. Human commits rely on husky only.
 - The marker proves that the commit skill ran, not the quality of the simplify pass.
+- The skip guard matches text in the command. It blocks the obvious and quoted bypasses (`--no-v*`, `-n`, `core.hooksPath`, `HUSKY=`, touching `CLAUDECODE`) and errs toward refusing, but it targets an agent cutting corners, not an adversary. CI runs `pnpm check` on every push as the backstop.
 
 ## Alternatives Considered
 - **Husky running `claude -p "/simplify"`**: minutes per commit, token cost, and code mutated during the commit.

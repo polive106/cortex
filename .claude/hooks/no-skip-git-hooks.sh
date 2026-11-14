@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# PreToolUse(Bash): agents must not skip husky, because .husky/pre-commit is where the
-# simplify marker is verified against the exact index being committed (ADR-0008).
+# PreToolUse(Bash): stop agents from skipping husky, where the simplify marker is verified (ADR-0008).
 set -euo pipefail
 
-COMMAND=$(jq -r '.tool_input.command // empty')
-case "$COMMAND" in *commit*) ;; *) exit 0 ;; esac
+IFS= read -r -d '' INPUT || true
+case "$INPUT" in *commit*) ;; *) exit 0 ;; esac # cheap prefilter: most Bash calls never reach jq
+COMMAND=$(jq -r '.tool_input.command // empty' <<<"$INPUT")
 
-# Drop quoted strings (commit messages) before looking for flags.
-UNQUOTED=$(printf '%s' "$COMMAND" | sed -E "s/\"[^\"]*\"//g; s/'[^']*'//g")
-if printf '%s' "$UNQUOTED" | grep -qE -- '--no-verify|core\.hooksPath|HUSKY=0|(^|[[:space:]])-[A-Za-z]*n[A-Za-z]*([[:space:]]|$)'; then
-  echo "Commit blocked: agents may not skip git hooks (--no-verify, -n, core.hooksPath, HUSKY=0). Use the commit skill." >&2
+# --no-verify (or an abbreviation), -n alone/combined/quoted, hook path overrides, HUSKY/CLAUDECODE tampering.
+SKIP='--no-v|[[:space:]"'"'"']-[A-Za-z]*n|core\.hooksPath|HUSKY=|CLAUDECODE'
+if [[ $COMMAND == *commit* && $COMMAND =~ $SKIP ]]; then
+  echo "Commit blocked: agents may not skip git hooks or alter HUSKY/CLAUDECODE. Use the commit skill." >&2
   exit 2
 fi
