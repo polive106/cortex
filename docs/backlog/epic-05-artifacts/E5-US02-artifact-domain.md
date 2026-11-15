@@ -4,13 +4,13 @@
 
 **Acceptance Criteria**:
 
-- [ ] `ArtifactPath` accepts only `out/<kebab>.html` or `out/<kebab>/<kebab>.html`, and builds one from a slug and an optional project
-- [ ] `Artifact` renders a self-contained page: CSP meta first in `<head>`, a `cortex:version` meta, and the built CSS in one marked `<style>`; `Artifact.source()` strips them again so an artifact can be re-edited
-- [ ] Sources with external scripts, stylesheets, frames, or `<base>` are refused, and so are sources over 512 KB
-- [ ] `PublishArtifact` bumps the version, builds the CSS through the `ArtifactBuilder` port, and commits the file plus a `log.md` entry as one commit, re-planning once on a conflict
-- [ ] `ReadArtifact` (optionally at a commit ref) and `ListArtifacts` use-cases
-- [ ] `WikiStore` gains `readFile(path, ref?)` and `listArtifacts()`
-- [ ] 100% coverage
+- [x] `ArtifactPath` accepts only `out/<kebab>.html` or `out/<kebab>/<kebab>.html`, and builds one from a slug and an optional project
+- [x] `Artifact` renders a self-contained page: CSP meta first in `<head>`, a `cortex:version` meta, and the built CSS in one marked `<style>`; `Artifact.source()` strips them again so an artifact can be re-edited
+- [x] Sources with external scripts, stylesheets, frames, or `<base>` are refused, and so are sources over 512 KB
+- [x] `PublishArtifact` bumps the version, builds the CSS through the `ArtifactBuilder` port, and commits the file plus a `log.md` entry as one commit, re-planning once on a conflict
+- [x] `ReadArtifact` (optionally at a commit ref) and `ListArtifacts` use-cases
+- [x] `WikiStore` gains `readFile(path, ref?)` and `listArtifacts()`
+- [x] 100% coverage
 
 **Technical Tasks**:
 
@@ -25,7 +25,7 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 

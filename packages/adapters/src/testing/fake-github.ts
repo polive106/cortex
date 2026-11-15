@@ -49,7 +49,12 @@ export class FakeGitHub {
         const path = decodeURIComponent(
           new URL(request.url).pathname.slice(`/repos/${this.owner}/${this.repo}/contents/`.length),
         );
-        const content = this.treeOf(this.head).get(path);
+        const ref = new URL(request.url).searchParams.get("ref") ?? this.branch;
+        if (ref === "malformed") return HttpResponse.json({ message: "Bad ref" }, { status: 422 });
+        const content =
+          this.commits.has(ref) || ref === this.branch
+            ? this.treeOf(ref === this.branch ? this.head : ref).get(path)
+            : undefined;
         return content === undefined
           ? HttpResponse.json({ message: "Not Found" }, { status: 404 })
           : HttpResponse.text(content);

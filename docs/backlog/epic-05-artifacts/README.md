@@ -5,9 +5,9 @@ Companion builds HTML artifacts (reports, dashboards, one-pagers) in its sandbox
 | ID | Title | Complexity | Status |
 |----|-------|------------|--------|
 | E5-US01 | Brain writes without approval | S | Done |
-| E5-US02 | Artifact domain | M | Pending |
-| E5-US03 | Tailwind artifact builder and artifact listing | M | Pending |
-| E5-US04 | Sandbox and shadcn design kit | M | Pending |
-| E5-US05 | Artifact tools and route | M | Pending |
+| E5-US02 | Artifact domain | M | Done |
+| E5-US03 | Tailwind artifact builder and artifact listing | M | Done |
+| E5-US04 | Sandbox and shadcn design kit | M | Done |
+| E5-US05 | Artifact tools and route | M | Done |
 | E5-US06 | Artifact preview panel | M | Pending |
 | E5-US07 | Artifact flow evals and E2E | M | Pending |

@@ -129,11 +129,12 @@ pnpm test:e2e           # Playwright on vercel dev against companion-test (pre-p
 # eval scripts set NODE_ENV=development: eve evals run a local dev server, and the generated
 # apps/web/lib/auth.ts fails closed at import time outside development.
 pnpm test:watch         # TDD loop
+pnpm sync:tailwind      # re-embed tailwindcss base CSS for artifacts after upgrading tailwindcss
 ```
 
 ## Test agent
 
-`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channel and has a scripted `demo_action` tool behind `approval: always()`. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
+`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>"). Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
 
 ## Environment variables
 

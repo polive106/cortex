@@ -10,7 +10,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@cortex/domain": "workspace:*"
+    "@cortex/domain": "workspace:*",
+    "tailwindcss": "4.3.0"
   },
   "devDependencies": {
     "msw": "^3.0.5"

@@ -4,12 +4,12 @@
 
 **Acceptance Criteria**:
 
-- [ ] `publish_artifact({ slug, title, project? })` reads `artifacts/<slug>/index.html` from the sandbox and runs `PublishArtifact`; the model sees only the path, version, and ref
-- [ ] `open_artifact({ path })` copies an `out/` artifact's source into the sandbox so it can be edited
-- [ ] `list_artifacts` lists everything under `out/`
-- [ ] `GET /artifacts?path&ref` on the companion serves the page as `text/html` behind the web chat's auth, with a `sandbox` CSP header
-- [ ] The web chat's auth is shared by both channels from one module
-- [ ] `container.ts` wires the builder and the use-cases; instructions mention artifacts
+- [x] `publish_artifact({ slug, title, project? })` reads `artifacts/<slug>/index.html` from the sandbox and runs `PublishArtifact`; the model sees only the path, version, and ref
+- [x] `open_artifact({ path })` copies an `out/` artifact's source into the sandbox so it can be edited
+- [x] `list_artifacts` lists everything under `out/`
+- [x] `GET /artifacts?path&ref` on the companion serves the page as `text/html` behind the web chat's auth, with a `sandbox` CSP header
+- [x] The web chat's auth is shared by both channels from one module
+- [x] `container.ts` wires the builder and the use-cases; instructions mention artifacts
 
 **Technical Tasks**:
 
@@ -19,12 +19,13 @@
 | Agent | Route | `agents/companion/agent/channels/artifacts.ts` |
 | Agent | Shared auth | `agents/companion/agent/lib/web-auth.ts` |
 | Agent | Wiring and instructions | `agents/companion/agent/container.ts`, `agents/companion/agent/instructions.md` |
+| Agent | Mount `/eve/<agent>/artifacts` on Vercel | `vercel.ts` |
 
 **Dependencies**: E5-US04
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 

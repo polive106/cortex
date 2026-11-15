@@ -92,6 +92,11 @@ describe("GitHubWikiStore", () => {
     expect(seen?.get("accept")).toBe("application/vnd.github.raw+json");
   });
 
+  it("reads null for a malformed ref instead of failing", async () => {
+    const store = connect(fakeGitHub());
+    await expect(store.readFile("out/roadmap.html", "malformed")).resolves.toBeNull();
+  });
+
   it("URL-encodes each path segment", async () => {
     let path = "";
     server.use(

@@ -4,11 +4,11 @@
 
 **Acceptance Criteria**:
 
-- [ ] `TailwindArtifactBuilder` compiles only the candidates found in the HTML with Tailwind v4's `compile()`, on the design kit's theme, minus fonts that need the network
-- [ ] Tailwind's base CSS is embedded as a module, and a test fails when it drifts from the installed `tailwindcss`
-- [ ] An in-memory twin for tests and flow evals; both pass a shared `ArtifactBuilder` contract
-- [ ] `listArtifacts()` and `readFile(path, ref)` on the in-memory, read-only, and GitHub stores, in the shared `WikiStore` contract
-- [ ] 95% coverage
+- [x] `TailwindArtifactBuilder` compiles only the candidates found in the HTML with Tailwind v4's `compile()`, on the design kit's theme, minus fonts that need the network
+- [x] Tailwind's base CSS is embedded as a module, and a test fails when it drifts from the installed `tailwindcss`
+- [x] An in-memory twin for tests and flow evals; both pass a shared `ArtifactBuilder` contract
+- [x] `listArtifacts()` and `readFile(path, ref)` on the in-memory, read-only, and GitHub stores, in the shared `WikiStore` contract
+- [x] 95% coverage
 
 **Technical Tasks**:
 
@@ -23,7 +23,7 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 
