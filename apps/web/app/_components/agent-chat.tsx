@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { replaceSessionRoute } from "@/lib/session-route";
 import { cn } from "@/lib/utils";
+import { ArtifactPreview } from "@/src/features/artifacts";
 import { AgentMessage } from "./agent-message";
 
 const DEFAULT_AGENT_NAME = "eve-agent";
@@ -170,69 +171,72 @@ export function AgentChat({
   );
 
   return (
-    <main className="flex h-dvh flex-col overflow-hidden bg-background text-foreground">
-      {showConversationLayout ? (
-        <ChatHeader canStartNewChat={activeSessionId !== undefined} />
-      ) : null}
+    <div className="flex h-dvh overflow-hidden bg-background text-foreground">
+      <main className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        {showConversationLayout ? (
+          <ChatHeader canStartNewChat={activeSessionId !== undefined} />
+        ) : null}
 
-      {showConversationLayout ? (
-        <Conversation
-          className="min-h-0 flex-1"
-          initial={sessionId === undefined ? undefined : false}
-          resize={activeSessionId === undefined ? "smooth" : "instant"}
-          scrollRestorationKey={
-            isEmpty || activeSessionId === undefined
-              ? undefined
-              : `eve:web-chat-scroll:${activeSessionId}`
-          }
+        {showConversationLayout ? (
+          <Conversation
+            className="min-h-0 flex-1"
+            initial={sessionId === undefined ? undefined : false}
+            resize={activeSessionId === undefined ? "smooth" : "instant"}
+            scrollRestorationKey={
+              isEmpty || activeSessionId === undefined
+                ? undefined
+                : `eve:web-chat-scroll:${activeSessionId}`
+            }
+          >
+            <ConversationTopFade className="top-14" />
+            <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
+              {agent.messages.map((message, index) =>
+                showPendingThinking &&
+                isPendingAssistantShell &&
+                message.id === lastMessage.id ? null : (
+                  <AgentMessage
+                    testId={`chat-row-message-${index}`}
+                    canRespond={canRespond}
+                    key={message.id}
+                    message={message}
+                    questionsFor={questionsFor}
+                    view={agent.view}
+                    onAnswers={async (answers) => {
+                      setCancellationError(undefined);
+                      await agent.respond(answers).catch((cause: unknown) => {
+                        setCancellationError(
+                          cause instanceof Error ? cause.message : "Unable to submit the answer.",
+                        );
+                      });
+                    }}
+                  />
+                ),
+              )}
+              {showPendingThinking ? <PendingActivity activity={now} /> : null}
+              {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+        ) : null}
+
+        <div
+          className={cn(
+            "mx-auto w-full px-4 sm:px-6",
+            showConversationLayout
+              ? "absolute bottom-0 left-1/2 z-20 max-w-3xl -translate-x-1/2 bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6"
+              : "flex max-w-xl flex-1 flex-col items-center justify-center gap-8 pb-[10vh]",
+          )}
         >
-          <ConversationTopFade className="top-14" />
-          <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
-            {agent.messages.map((message, index) =>
-              showPendingThinking &&
-              isPendingAssistantShell &&
-              message.id === lastMessage.id ? null : (
-                <AgentMessage
-                  testId={`chat-row-message-${index}`}
-                  canRespond={canRespond}
-                  key={message.id}
-                  message={message}
-                  questionsFor={questionsFor}
-                  view={agent.view}
-                  onAnswers={async (answers) => {
-                    setCancellationError(undefined);
-                    await agent.respond(answers).catch((cause: unknown) => {
-                      setCancellationError(
-                        cause instanceof Error ? cause.message : "Unable to submit the answer.",
-                      );
-                    });
-                  }}
-                />
-              ),
-            )}
-            {showPendingThinking ? <PendingActivity activity={now} /> : null}
-            {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-      ) : null}
-
-      <div
-        className={cn(
-          "mx-auto w-full px-4 sm:px-6",
-          showConversationLayout
-            ? "fixed bottom-0 left-1/2 z-20 max-w-3xl -translate-x-1/2 bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6"
-            : "flex max-w-xl flex-1 flex-col items-center justify-center gap-8 pb-[10vh]",
-        )}
-      >
-        {showConversationLayout ? null : (
-          <div className="flex flex-col items-center gap-3 text-center">
-            <h1 className="font-medium text-5xl tracking-tighter">{AGENT_NAME}</h1>
-          </div>
-        )}
-        <div className="w-full">{composer}</div>
-      </div>
-    </main>
+          {showConversationLayout ? null : (
+            <div className="flex flex-col items-center gap-3 text-center">
+              <h1 className="font-medium text-5xl tracking-tighter">{AGENT_NAME}</h1>
+            </div>
+          )}
+          <div className="w-full">{composer}</div>
+        </div>
+      </main>
+      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} />
+    </div>
   );
 }
 
@@ -287,23 +291,24 @@ function ErrorMessage({ message }: { readonly message: string }) {
 
 function ChatHeader({ canStartNewChat }: { readonly canStartNewChat: boolean }) {
   return (
-    <header className="pointer-events-none fixed top-0 right-0 left-0 z-20 h-14">
-      <div className="relative mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
+    <header className="pointer-events-none absolute top-0 right-0 left-0 z-20 h-14">
+      <div className="mx-auto flex h-full w-full max-w-3xl items-center justify-center bg-background px-24">
         <span className="truncate text-muted-foreground text-sm">{AGENT_NAME}</span>
-        {canStartNewChat ? (
-          <Button
-            aria-label="Start a new chat"
-            className="pointer-events-auto fixed top-3 right-6 pr-4"
-            onClick={() => window.location.assign("/s")}
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            <PlusIcon className="size-4" />
-            <span className="hidden font-normal text-sm sm:inline">New chat</span>
-          </Button>
-        ) : null}
       </div>
+      {canStartNewChat ? (
+        // Anchored to the chat column's edge, which the artifact panel can narrow.
+        <Button
+          aria-label="Start a new chat"
+          className="pointer-events-auto absolute top-3 right-6 pr-4"
+          onClick={() => window.location.assign("/s")}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          <PlusIcon className="size-4" />
+          <span className="hidden font-normal text-sm sm:inline">New chat</span>
+        </Button>
+      ) : null}
     </header>
   );
 }

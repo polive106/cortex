@@ -19,14 +19,15 @@ Source of truth: `node_modules/eve/docs/evals/` — `index.mdx` (defineEval, `mo
 ```ts
 import { defineEval } from "eve/evals";
 
+// Canonical version: agents/companion-test/evals/flows/approval.eval.ts
 export default defineEval({
-  description: "write_page parks for approval and commits after approve",
+  description: "demo_action parks for approval and runs after approve",
   async test(t) {
-    const turn = await t.send("save: deploys happen on Fridays");
-    const approval = turn.session.requireInteraction();     // gate: exactly one pending
-    const done = await turn.session.respond(/* approve approval */);
-    done.expectOk();
-    t.calledTool("write_page", { count: 1 });
+    const parked = await t.send("demo approval");
+    parked.session.requireInteraction({ toolName: "demo_action" }); // gate: exactly one pending
+    const done = await parked.session.respondAll("approve");
+    done.succeeded();
+    done.calledTool("demo_action", { status: "completed" });
   },
 });
 ```

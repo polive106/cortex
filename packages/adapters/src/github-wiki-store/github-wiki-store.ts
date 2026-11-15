@@ -2,6 +2,7 @@ import {
   type Changeset,
   type CommitResult,
   ConflictError,
+  isArtifactPath,
   isPagePath,
   type WikiFile,
   type WikiStore,
@@ -51,18 +52,24 @@ export class GitHubWikiStore implements WikiStore {
     this.base = `${options.apiUrl ?? "https://api.github.com"}/repos/${options.owner}/${options.repo}`;
   }
 
-  async readFile(path: string): Promise<string | null> {
+  async readFile(path: string, ref?: string): Promise<string | null> {
     const response = await this.send(
       "GET",
-      `/contents/${encodePath(path)}?ref=${encodeURIComponent(this.branch)}`,
-      { accept: "application/vnd.github.raw+json", allow: 404 },
+      `/contents/${encodePath(path)}?ref=${encodeURIComponent(ref ?? this.branch)}`,
+      // An unknown ref is a 404 like a missing file; a malformed one is a 422.
+      { accept: "application/vnd.github.raw+json", allow: ref === undefined ? [404] : [404, 422] },
     );
-    return response.status === 404 ? null : response.text();
+    return response.ok ? response.text() : null;
   }
 
   async listPages(): Promise<string[]> {
     const paths = await this.treePaths(this.branch);
     return paths.filter(isPagePath).sort();
+  }
+
+  async listArtifacts(): Promise<string[]> {
+    const paths = await this.treePaths(this.branch);
+    return paths.filter(isArtifactPath).sort();
   }
 
   async readPages(): Promise<WikiFile[]> {
@@ -110,7 +117,7 @@ export class GitHubWikiStore implements WikiStore {
     });
     const update = await this.send("PATCH", `/git/refs/heads/${this.branch}`, {
       body: { sha: commit.sha, force: false },
-      allow: 422,
+      allow: [422],
     });
     if (update.status === 422) {
       throw new ConflictError("The brain changed while committing; re-read and try again");
@@ -137,7 +144,7 @@ export class GitHubWikiStore implements WikiStore {
   private async send(
     method: string,
     path: string,
-    options: { body?: unknown; accept?: string; allow?: number } = {},
+    options: { body?: unknown; accept?: string; allow?: readonly number[] } = {},
   ): Promise<Response> {
     const response = await this.#fetch(`${this.base}${path}`, {
       method,
@@ -149,7 +156,7 @@ export class GitHubWikiStore implements WikiStore {
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
     });
-    if (!response.ok && response.status !== options.allow) {
+    if (!response.ok && !options.allow?.includes(response.status)) {
       throw new GitHubApiError(method, path.replace(/\?.*$/, ""), response.status);
     }
     return response;

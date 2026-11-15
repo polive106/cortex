@@ -21,14 +21,12 @@ afterEach(() => useContainer(undefined));
 type Note = {
   source: { title: string; origin: string; text: string };
   pages: { path?: string; title: string; summary: string; body: string }[];
-  reason: string;
 };
 
 const deploys = { title: "Deploys", summary: "How we ship", body: "We deploy on push.\n" };
 const note: Note = {
   source: { title: "Deploy notes", origin: "pasted", text: "We deploy on push." },
   pages: [deploys],
-  reason: "New deploy process",
 };
 
 describe("wiki tools", () => {
@@ -47,7 +45,7 @@ describe("wiki tools", () => {
   });
 
   it("search_wiki ranks matching pages", async () => {
-    const result = (await run(searchWiki)({ query: "companion approve" })) as {
+    const result = (await run(searchWiki)({ query: "companion pages" })) as {
       results: { path: string }[];
     };
     expect(result.results.map((hit) => hit.path)).toEqual(["wiki/welcome.md"]);
@@ -70,20 +68,7 @@ describe("wiki tools", () => {
     await expect(store.readFile("AGENTS.md")).resolves.toBe(STARTER_BRAIN["AGENTS.md"]);
   });
 
-  it("write_page always needs approval, and the prompt shows the paths and the reason", () => {
-    const approval = writePage.approval as unknown as {
-      prompt: (args: { input: Note }) => string;
-    };
-    expect(approval.prompt({ input: note })).toBe(
-      "Write to the brain: wiki/deploys.md (New deploy process). Pages: Deploys — How we ship",
-    );
-    expect(
-      approval.prompt({ input: { ...note, pages: [{ ...deploys, path: "AGENTS.md" }] } }),
-    ).toBe(
-      'Write to the brain: (Invalid path "AGENTS.md": must live under wiki/) (New deploy process). Pages: Deploys — How we ship',
-    );
-    expect(approval.prompt({ input: { ...note, pages: [{ ...deploys, title: "!!!" }] } })).toBe(
-      'Write to the brain: (Invalid path "wiki/.md": segments must be lowercase kebab-case) (New deploy process). Pages: !!! — How we ship',
-    );
+  it("write_page needs no approval (ADR-0011)", () => {
+    expect(writePage.approval).toBeUndefined();
   });
 });

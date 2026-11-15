@@ -13,12 +13,16 @@ export class ReadOnlyWikiStore implements WikiStore {
     private readonly reason: string,
   ) {}
 
-  readFile(path: string): Promise<string | null> {
-    return this.inner.readFile(path);
+  readFile(path: string, ref?: string): Promise<string | null> {
+    return this.inner.readFile(path, ref);
   }
 
   listPages(): Promise<string[]> {
     return this.inner.listPages();
+  }
+
+  listArtifacts(): Promise<string[]> {
+    return this.inner.listArtifacts();
   }
 
   readPages(): Promise<WikiFile[]> {

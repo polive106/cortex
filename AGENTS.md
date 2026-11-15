@@ -60,13 +60,21 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 
 **Build order for a feature:** domain → adapters → agent tools/memory → web → evals and E2E.
 
-## Brain rules (ADR-0004, ADR-0005)
+## Brain rules (ADR-0004, ADR-0005, ADR-0011)
 
-- Agents get only the **narrow wiki tools** (`list_pages`, `read_page`, `search_wiki`, `write_page`). Never add general GitHub tools.
-- `write_page` **always requires human approval** (`approval: always()`).
-- One approved ingest = **one commit** covering `raw/`, the pages, `index.md`, and `log.md`. Merge into existing pages instead of appending duplicates.
+- Agents get only the **narrow brain tools** (`list_pages`, `read_page`, `search_wiki`, `write_page`, `list_artifacts`, `open_artifact`, `publish_artifact`). Never add general GitHub tools.
+- Brain writes need **no approval** (ADR-0011): no brain tool sets `approval`. The reply says what was saved and where. Tools with side effects outside the brain still need approval.
+- One ingest = **one commit** covering `raw/`, the pages, `index.md`, and `log.md`. Merge into existing pages instead of appending duplicates.
 - Wiki paths are validated by `PagePath` (`wiki/<kebab>.md`) and nothing may escape `wiki/`.
 - Credentials (`BRAIN_GITHUB_TOKEN`, API keys) live in server-side env vars and **never** enter prompts, tool inputs, or tool results.
+
+## Artifact rules (ADR-0012)
+
+- Artifacts live at `out/<project>/<slug>.html` or `out/<slug>.html`, validated by `ArtifactPath`. One publish = one version = one commit (the file plus `log.md`).
+- The agent writes `artifacts/<slug>/index.html` in its sandbox from the design kit (`agents/companion/agent/lib/design-kit.ts`, written to `design/`). The kit's tokens must match `apps/web/app/globals.css` (a test checks).
+- Pages are self-contained: the domain adds the CSP and the compiled CSS, and refuses external scripts, stylesheets, frames, and `<base>`.
+- Tool outputs carry only path, version, and ref. The web panel fetches the page from `GET /eve/<agent>/artifacts?path&ref` and shows it only in `<iframe sandbox="allow-scripts" srcdoc>`. Never add `allow-same-origin`.
+- After upgrading `tailwindcss`, regenerate the embedded base CSS with `pnpm sync:tailwind`.
 
 ## Frontend rules (ADR-0003)
 
@@ -121,15 +129,16 @@ pnpm test:e2e           # Playwright on vercel dev against companion-test (pre-p
 # eval scripts set NODE_ENV=development: eve evals run a local dev server, and the generated
 # apps/web/lib/auth.ts fails closed at import time outside development.
 pnpm test:watch         # TDD loop
+pnpm sync:tailwind      # re-embed tailwindcss base CSS for artifacts after upgrading tailwindcss
 ```
 
 ## Test agent
 
-`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channel and has a scripted `demo_action` tool behind `approval: always()`. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
+`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>"). Its sandbox is always just-bash: under `vercel dev` the default provider would pick Vercel Sandbox, which needs Vercel credentials E2E and CI don't have. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
 
 ## Environment variables
 
-Without `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`, the brain is in memory, seeded from `agents/companion/agent/lib/starter-brain.ts`. Hosted builds make that brain read-only, so approved writes can't vanish.
+Without `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`, the brain is in memory, seeded from `agents/companion/agent/lib/starter-brain.ts`. Hosted builds make that brain read-only, so writes can't vanish.
 
 Local values go in the root `.env.local` (gitignored; `eve link` also writes `VERCEL_OIDC_TOKEN` there). Deployed values are Vercel env vars, marked sensitive. Never print them.
 
@@ -142,6 +151,7 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `BRAIN_REPO` | local, production, preview | `owner/repo` of the brain, e.g. `polive106/brain`. With the token, it switches the brain to GitHub |
 | `BRAIN_BRANCH` | optional | Defaults to `main` |
 | `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE` | optional, local | Chromium for E2E when the installed one doesn't match Playwright (e.g. `/opt/pw-browsers/chromium` in Claude Code cloud sessions) |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |
 
 Set a deployed value from `.env.local` without echoing it:

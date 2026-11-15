@@ -116,11 +116,6 @@ class ImmutableSourceError extends ConflictError {
   }
 }
 
-/** The page paths an ingest would write, by the same rule Ingest uses. Throws if any is invalid. */
-export function ingestPaths(request: Pick<IngestRequest, "pages">): string[] {
-  return pageTargets(request).map(({ path }) => path.value);
-}
-
 function pageTargets(request: Pick<IngestRequest, "pages">) {
   if (request.pages.length === 0) throw new InvalidIngestError("An ingest needs at least one page");
   const targets = request.pages.map((input) => ({

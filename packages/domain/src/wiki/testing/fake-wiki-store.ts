@@ -1,3 +1,4 @@
+import { isArtifactPath } from "../../artifacts/entities/artifact-path";
 import type { Changeset } from "../entities/changeset";
 import { isPagePath } from "../entities/page-path";
 import { ConflictError } from "../errors";
@@ -9,15 +10,21 @@ export class FakeWikiStore implements WikiStore {
   readonly commits: { message: string; paths: string[] }[] = [];
   /** Simulates another writer moving the head: the next N commits fail with ConflictError. */
   headMovesFor = 0;
+  private readonly snapshots = new Map<string, Record<string, string>>();
 
   constructor(readonly files: Record<string, string> = {}) {}
 
-  async readFile(path: string): Promise<string | null> {
-    return this.files[path] ?? null;
+  async readFile(path: string, ref?: string): Promise<string | null> {
+    const files = ref === undefined ? this.files : this.snapshots.get(ref);
+    return files?.[path] ?? null;
   }
 
   async listPages(): Promise<string[]> {
     return Object.keys(this.files).filter(isPagePath).sort();
+  }
+
+  async listArtifacts(): Promise<string[]> {
+    return Object.keys(this.files).filter(isArtifactPath).sort();
   }
 
   async readPages(): Promise<WikiFile[]> {
@@ -33,7 +40,9 @@ export class FakeWikiStore implements WikiStore {
     if (clash) throw new ConflictError(`${clash.path} already exists`);
     for (const { path, content } of changeset.files) this.files[path] = content;
     this.commits.push({ message, paths: changeset.paths });
-    return { ref: `commit-${this.commits.length}` };
+    const ref = `commit-${this.commits.length}`;
+    this.snapshots.set(ref, { ...this.files });
+    return { ref };
   }
 }
 

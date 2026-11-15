@@ -5,8 +5,8 @@
 
 const SCHEMA = `# Brain schema
 
-This repo is a team wiki that companion maintains. Humans approve every write. These rules say
-how pages are written. Companion reads them on every turn.
+This repo is a team wiki that companion maintains. Every write is one commit, so any change can
+be reverted. These rules say how pages are written. Companion reads them on every turn.
 
 ## Layout
 
@@ -83,9 +83,9 @@ sources: []
 updated: 2026-11-14
 ---
 
-This is the team's brain: a wiki that companion keeps up to date and humans approve. Ask
-companion about anything written here and it answers from these pages. When you share something
-worth keeping, companion proposes a change, and nothing is written until you approve it.
+This is the team's brain: a wiki that companion keeps up to date. Ask companion about anything
+written here and it answers from these pages. When you share something worth keeping, companion
+saves it as one commit and tells you what changed.
 `;
 
 export const STARTER_BRAIN: Readonly<Record<string, string>> = {

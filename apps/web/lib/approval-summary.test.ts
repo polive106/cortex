@@ -4,7 +4,7 @@ import { approvalDetails } from "./approval-summary";
 describe("approvalDetails", () => {
   it("lists scalar inputs as key and value, in full", () => {
     expect(
-      approvalDetails({ callId: "c1", name: "write_page", input: { path: "wiki/a.md", n: 2 } }),
+      approvalDetails({ callId: "c1", name: "demo_action", input: { path: "wiki/a.md", n: 2 } }),
     ).toEqual([
       { key: "path", preview: "wiki/a.md", full: "wiki/a.md", truncated: false },
       { key: "n", preview: "2", full: "2", truncated: false },
@@ -24,10 +24,10 @@ describe("approvalDetails", () => {
     expect(long).toMatchObject({ full: body, truncated: true });
   });
 
-  it("pretty-prints nested values in full, so the approver sees every page body", () => {
+  it("pretty-prints nested values in full, so the approver sees every value", () => {
     const [pages] = approvalDetails({
       callId: "c1",
-      name: "write_page",
+      name: "demo_action",
       input: { pages: [{ title: "T", body: "line 1\nline 2" }] },
     });
     expect(pages?.full).toBe(JSON.stringify([{ title: "T", body: "line 1\nline 2" }], null, 2));

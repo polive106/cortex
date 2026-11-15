@@ -1,6 +1,6 @@
 import { oneLine } from "./text";
 
-export type LogOperation = "ingest" | "query" | "lint";
+export type LogOperation = "ingest" | "query" | "lint" | "publish";
 
 export interface LogEntryProps {
   /** YYYY-MM-DD */

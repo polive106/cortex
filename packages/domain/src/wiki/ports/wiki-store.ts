@@ -12,10 +12,15 @@ export interface CommitResult {
 
 /** The brain repo, narrowed to what wiki use-cases need (ADR-0004, ADR-0005). */
 export interface WikiStore {
-  /** A file's content, or null when it doesn't exist. */
-  readFile(path: string): Promise<string | null>;
+  /**
+   * A file's content, or null when it doesn't exist. With `ref` (a ref a commit returned), the
+   * content as of that commit; null when the ref is unknown.
+   */
+  readFile(path: string, ref?: string): Promise<string | null>;
   /** Every page path under `wiki/` (`.md` files only), sorted. */
   listPages(): Promise<string[]>;
+  /** Every artifact path under `out/` (`.html` files only), sorted (ADR-0012). */
+  listArtifacts(): Promise<string[]>;
   /** Every page under `wiki/` with its content, sorted by path. */
   readPages(): Promise<WikiFile[]>;
   /**

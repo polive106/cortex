@@ -1,6 +1,7 @@
 import { GitHubWikiStore, InMemoryWikiStore, ReadOnlyWikiStore } from "@cortex/adapters";
 import { afterEach, describe, expect, it } from "vitest";
 import { container, createContainer, useContainer } from "./container";
+import { DESIGN_KIT_FILES } from "./lib/design-kit";
 
 afterEach(() => useContainer(undefined));
 
@@ -36,6 +37,18 @@ describe("createContainer", () => {
     expect(createContainer({ VERCEL_ENV: "development" }).wikiStore).toBeInstanceOf(
       InMemoryWikiStore,
     );
+  });
+
+  it("publishes artifacts with Tailwind on the design kit's theme", async () => {
+    const c = createContainer({});
+    const source = DESIGN_KIT_FILES["design/template.html"] as string;
+    const result = await c.publishArtifact.execute({ slug: "demo", title: "Demo", source });
+    expect(result).toMatchObject({ path: "out/demo.html", version: 1 });
+    const html = (await c.wikiStore.readFile("out/demo.html")) as string;
+    expect(html).toContain("--card: oklch(1 0 0)");
+    expect(html).toContain(".bg-card");
+    expect(html).toContain(".md\\:grid-cols-3");
+    expect(html).toContain("prefers-color-scheme: dark");
   });
 
   it("refuses a malformed BRAIN_REPO instead of guessing", () => {

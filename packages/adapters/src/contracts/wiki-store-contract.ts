@@ -8,6 +8,9 @@ export const CONTRACT_SEED: Record<string, string> = {
   "wiki/people/ada.md": "---\ntitle: Ada\n---\n\nOwns releases.\n",
   "wiki/notes.txt": "deploy, but not a page",
   "raw/2026-11-14-deploy.md": "deploy deploy",
+  "out/roadmap.html": "<p>roadmap</p>",
+  "out/acme/q3.html": "<p>q3</p>",
+  "out/notes.md": "not an artifact",
 };
 
 /**
@@ -26,6 +29,24 @@ export function describeWikiStoreContract(name: string, makeStore: () => Promise
     it("lists only .md files under wiki/, sorted", async () => {
       const store = await makeStore();
       await expect(store.listPages()).resolves.toEqual(["wiki/deploys.md", "wiki/people/ada.md"]);
+    });
+
+    it("lists only .html files under out/, sorted", async () => {
+      const store = await makeStore();
+      await expect(store.listArtifacts()).resolves.toEqual([
+        "out/acme/q3.html",
+        "out/roadmap.html",
+      ]);
+    });
+
+    it("reads a file as of an earlier commit, and null for an unknown ref", async () => {
+      const store = await makeStore();
+      const first = await store.commit(new Changeset().write("out/plan.html", "v1"), "v1");
+      await store.commit(new Changeset().write("out/plan.html", "v2"), "v2");
+      await expect(store.readFile("out/plan.html")).resolves.toBe("v2");
+      await expect(store.readFile("out/plan.html", first.ref)).resolves.toBe("v1");
+      await expect(store.readFile("AGENTS.md", first.ref)).resolves.toBe("# Schema\n");
+      await expect(store.readFile("out/plan.html", "unknown-ref")).resolves.toBeNull();
     });
 
     it("reads every wiki page with its content, sorted by path", async () => {
