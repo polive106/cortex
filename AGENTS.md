@@ -151,6 +151,7 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `BRAIN_REPO` | local, production, preview | `owner/repo` of the brain, e.g. `polive106/brain`. With the token, it switches the brain to GitHub |
 | `BRAIN_BRANCH` | optional | Defaults to `main` |
 | `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
+| `PLAYWRIGHT_CHROMIUM_EXECUTABLE` | optional, local | Chromium for E2E when the installed one doesn't match Playwright (e.g. `/opt/pw-browsers/chromium` in Claude Code cloud sessions) |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |
 
 Set a deployed value from `.env.local` without echoing it:
