@@ -4,10 +4,19 @@ import { test as base, expect, type Locator, type Page } from "@playwright/test"
 export class ChatPage {
   readonly input: Locator;
   readonly approvalCard: Locator;
+  readonly artifactPanel: Locator;
+  readonly artifactVersion: Locator;
 
   constructor(readonly page: Page) {
     this.input = page.getByTestId("chat-input-message");
     this.approvalCard = page.getByTestId("chat-card-approval");
+    this.artifactPanel = page.getByTestId("chat-panel-artifact");
+    this.artifactVersion = page.getByTestId("chat-select-artifact-version");
+  }
+
+  /** The artifact's page, inside the preview's sandboxed frame. */
+  artifactFrame() {
+    return this.page.frameLocator('[data-testid="chat-frame-artifact"]');
   }
 
   message(index: number): Locator {

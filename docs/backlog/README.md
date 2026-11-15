@@ -43,7 +43,7 @@ out/        HTML artifacts, optionally grouped by project
 | [E2](./epic-02-companion-web/README.md) | Companion and web chat | Done |
 | [E3](./epic-03-brain/README.md) | Brain (Karpathy LLM wiki) | In Progress |
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
-| [E5](./epic-05-artifacts/README.md) | Artifacts | In Progress |
+| [E5](./epic-05-artifacts/README.md) | Artifacts | Done |
 
 ## Implementation order
 

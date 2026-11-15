@@ -4,11 +4,11 @@
 
 **Acceptance Criteria**:
 
-- [ ] A right-hand panel opens when an artifact is published or opened, and follows the newest version
-- [ ] A version picker lists every version from the conversation; picking one loads that commit
-- [ ] The page renders in `<iframe sandbox="allow-scripts" srcdoc>`: no same-origin access, and its CSP blocks the network
-- [ ] The panel can be closed and reopened; on small screens it covers the chat
-- [ ] Feature slice under `apps/web/src/features/artifacts/` with 90% coverage; widgets have no hooks
+- [x] A right-hand panel opens when an artifact is published or opened, and follows the newest version
+- [x] A version picker lists every version from the conversation; picking one loads that commit
+- [x] The page renders in `<iframe sandbox="allow-scripts" srcdoc>`: no same-origin access, and its CSP blocks the network
+- [x] The panel can be closed and reopened; on small screens it covers the chat
+- [x] Feature slice under `apps/web/src/features/artifacts/` with 90% coverage; widgets have no hooks
 
 **Technical Tasks**:
 
@@ -23,7 +23,7 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 

@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 // Coverage thresholds from ADR-0007, enforced in one place for every project.
@@ -13,6 +14,15 @@ export default defineConfig({
     projects: [
       "packages/*",
       { test: { name: "web", include: ["apps/web/{lib,app}/**/*.test.{ts,tsx}"] } },
+      {
+        // Web feature slices (ADR-0003): React hooks and widgets in a DOM.
+        resolve: { alias: { "@": fileURLToPath(new URL("./apps/web", import.meta.url)) } },
+        test: {
+          name: "web-features",
+          include: ["apps/web/src/**/*.test.{ts,tsx}"],
+          environment: "happy-dom",
+        },
+      },
       { test: { name: "agents", include: ["agents/*/agent/**/*.test.ts"] } },
     ],
     coverage: {

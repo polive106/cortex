@@ -4,15 +4,15 @@
 
 **Acceptance Criteria**:
 
-- [ ] companion-test scripts "make artifact <slug>" and "revise artifact <slug>" (write the file, then publish)
-- [ ] Flow evals: publish then revise gives versions 1 and 2; a missing file is reported
-- [ ] Playwright: the panel opens with the page in the frame, a revision shows version 2, and picking version 1 shows the first page
+- [x] companion-test scripts "make artifact <slug>" and "revise artifact <slug>" (write the file, then publish)
+- [x] Flow evals: publish then revise gives versions 1 and 2; a missing file is reported
+- [x] Playwright: the panel opens with the page in the frame, a revision shows version 2, and picking version 1 shows the first page
 
 **Technical Tasks**:
 
 | Layer | Task | File(s) |
 | ----- | ---- | ------- |
-| Agent | Test double scripts and tool re-exports | `agents/companion-test/agent/` |
+| Agent | Test double scripts, tool re-exports, and a just-bash sandbox with the design kit | `agents/companion-test/agent/` |
 | Evals | Flow evals | `agents/companion-test/evals/flows/artifacts.eval.ts` |
 | E2E | Panel spec | `e2e/tests/chat/artifacts.spec.ts`, `e2e/fixtures/chat.ts` |
 
@@ -20,7 +20,7 @@
 
 **Complexity**: M
 
-**Status**: Pending
+**Status**: Done
 
 **Test Scenarios**:
 
