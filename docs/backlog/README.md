@@ -20,7 +20,8 @@ cortex is a home for several eve agents that share one **brain**: a Karpathy-sty
 | **IndexEntry** | One line in `index.md`: page path, title, one-line summary |
 | **LogEntry** | One append-only line in `log.md`: date, operation (ingest/query/lint), summary, commit |
 | **Changeset** | The full set of file writes for one ingest: source, pages, index, log. Applied as **one commit** |
-| **Ports** | `WikiStore` (read/list/search/commit), `SourceFetcher` (URL → text), `Clock`, `ArtifactBuilder` (HTML → CSS) |
+| **Ports** | `WikiStore` (read/list/search/commit), `SourceFetcher` (URL → text), `Clock`, `ArtifactBuilder` (HTML → CSS), `SessionIndex` (per-user session list) |
+| **SessionSummary** | One entry in a user's session list: session id, owner, title, created and updated times |
 | **Artifact** | A self-contained HTML page under `out/` (`out/<project>/<slug>.html` or `out/<slug>.html`), styled with the shadcn design kit. Each publish is a new version |
 | **Use-cases** | `ReadIndex`, `ReadPage`, `SearchWiki`, `ProposeIngest`, `ApplyIngest`, `PublishArtifact`, `ReadArtifact`, `ListArtifacts` |
 
@@ -44,6 +45,7 @@ out/        HTML artifacts, optionally grouped by project
 | [E3](./epic-03-brain/README.md) | Brain (Karpathy LLM wiki) | In Progress |
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
 | [E5](./epic-05-artifacts/README.md) | Artifacts | Done |
+| [E6](./epic-06-sessions/README.md) | Session history | Done |
 
 ## Implementation order
 
@@ -74,12 +76,15 @@ out/        HTML artifacts, optionally grouped by project
 24. E5-US05: artifact tools and route
 25. E5-US06: artifact preview panel
 26. E5-US07: artifact flow evals and E2E
-27. E3-US08: citations in answers and the web UI
-28. E3-US09: real-model behavior evals
-29. E4-US01: Slack channel via Vercel Connect
-30. E4-US02: mentions and DMs
-31. E4-US03: approvals in Slack
-32. E4-US04: "save this thread" ingestion
+27. E6-US01: session index domain and Upstash adapter (ADR-0013)
+28. E6-US02: session recording hook and sessions route
+29. E6-US03: session sidebar with rename and delete
+30. E3-US08: citations in answers and the web UI
+31. E3-US09: real-model behavior evals
+32. E4-US01: Slack channel via Vercel Connect
+33. E4-US02: mentions and DMs
+34. E4-US03: approvals in Slack
+35. E4-US04: "save this thread" ingestion
 
 ## Later / ideas (not yet stories)
 

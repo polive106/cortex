@@ -76,6 +76,12 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 - Tool outputs carry only path, version, and ref. The web panel fetches the page from `GET /eve/<agent>/artifacts?path&ref` and shows it only in `<iframe sandbox="allow-scripts" srcdoc>`. Never add `allow-same-origin`.
 - After upgrading `tailwindcss`, regenerate the embedded base CSS with `pnpm sync:tailwind`.
 
+## Session index rules (ADR-0013)
+
+- eve can't list sessions, so companion keeps each user's list in a `SessionIndex` (Upstash Redis, or in memory). Every call is scoped by the owner, the initiator's `principalId`.
+- The global hook `agents/companion/agent/hooks/session-index.ts` records web channel sessions on `delivery.consumed`. The title comes from the first message and is set only once, so a later turn never overwrites a rename. If recording fails, the error is logged and the chat isn't affected.
+- `/eve/<agent>/sessions` (behind `WEB_AUTH`, mounted by `vercel.ts`) serves `GET`, `PATCH ?id=` `{ title }`, and `DELETE ?id=`. Delete ends the eve session first, then removes the entry.
+
 ## Frontend rules (ADR-0003)
 
 `apps/web/src/features/<feature>/`:
@@ -134,7 +140,7 @@ pnpm sync:tailwind      # re-embed tailwindcss base CSS for artifacts after upgr
 
 ## Test agent
 
-`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>"). Its sandbox is always just-bash: under `vercel dev` the default provider would pick Vercel Sandbox, which needs Vercel credentials E2E and CI don't have. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
+`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels (chat, artifacts, sessions), session-index hook, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>"). Its sandbox is always just-bash: under `vercel dev` the default provider would pick Vercel Sandbox, which needs Vercel credentials E2E and CI don't have. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
 
 ## Environment variables
 
@@ -150,6 +156,8 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `BRAIN_GITHUB_TOKEN` | local, production, preview | Fine-grained token for `polive106/brain`, Contents read/write (ADR-0005). Read only in `container.ts` |
 | `BRAIN_REPO` | local, production, preview | `owner/repo` of the brain, e.g. `polive106/brain`. With the token, it switches the brain to GitHub |
 | `BRAIN_BRANCH` | optional | Defaults to `main` |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | local, production, preview (written by the Vercel Marketplace Upstash integration) | The session index in Upstash Redis (ADR-0013). Without both, the index is in memory and forgets entries on restart. Read only in `container.ts` |
+| `SESSIONS_STORE` | scripts | `memory` forces the in-memory session index. Set by `pnpm eval`, `pnpm eval:real`, and E2E |
 | `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE` | optional, local | Chromium for E2E when the installed one doesn't match Playwright (e.g. `/opt/pw-browsers/chromium` in Claude Code cloud sessions) |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |

@@ -1,5 +1,6 @@
 import { Page } from "../entities/page";
 import { PagePath } from "../entities/page-path";
+import { collapseWhitespace } from "../entities/text";
 import type { WikiStore } from "../ports/wiki-store";
 
 export interface SearchHit {
@@ -50,6 +51,6 @@ function snippet(body: string, terms: readonly string[]): string {
   const at = positions.length > 0 ? Math.min(...positions) : 0;
   const start = Math.max(0, at - SNIPPET_RADIUS);
   const end = Math.min(body.length, at + SNIPPET_RADIUS);
-  const text = body.slice(start, end).replace(/\s+/g, " ").trim();
+  const text = collapseWhitespace(body.slice(start, end));
   return `${start > 0 ? "…" : ""}${text}${end < body.length ? "…" : ""}`;
 }

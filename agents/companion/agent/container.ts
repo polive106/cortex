@@ -1,8 +1,10 @@
 import {
   GitHubWikiStore,
+  InMemorySessionIndex,
   InMemoryWikiStore,
   ReadOnlyWikiStore,
   TailwindArtifactBuilder,
+  UpstashSessionIndex,
 } from "@cortex/adapters";
 import {
   type ArtifactBuilder,
@@ -10,11 +12,16 @@ import {
   Ingest,
   ListArtifacts,
   ListPages,
+  ListSessions,
   PublishArtifact,
   ReadArtifact,
   ReadIndex,
   ReadPage,
+  RecordSessionActivity,
+  RemoveSession,
+  RenameSession,
   SearchWiki,
+  type SessionIndex,
   type WikiStore,
 } from "@cortex/domain";
 import { THEME_CSS } from "./lib/design-kit";
@@ -30,6 +37,11 @@ export interface Container {
   readonly publishArtifact: PublishArtifact;
   readonly readArtifact: ReadArtifact;
   readonly listArtifacts: ListArtifacts;
+  readonly sessionIndex: SessionIndex;
+  readonly recordSessionActivity: RecordSessionActivity;
+  readonly listSessions: ListSessions;
+  readonly renameSession: RenameSession;
+  readonly removeSession: RemoveSession;
 }
 
 /** Test seams: anything not given is built from the environment. */
@@ -48,11 +60,15 @@ const systemClock: Clock = { now: () => new Date() };
  * BRAIN_STORE=memory forces the in-memory brain, so flow evals and E2E never touch the real repo.
  * Hosted builds without GitHub settings get a read-only brain: a write would vanish
  * with the server, so it's refused instead.
+ *
+ * The session index (ADR-0013) is Upstash Redis with UPSTASH_REDIS_REST_URL and
+ * UPSTASH_REDIS_REST_TOKEN set, and in memory otherwise or with SESSIONS_STORE=memory.
  */
 export function createContainer(env: Env, overrides: ContainerOverrides = {}): Container {
   const wikiStore = brainStore(env);
   // Artifacts compile on the design kit's theme, in-process (ADR-0012).
   const builder = overrides.builder ?? new TailwindArtifactBuilder(THEME_CSS);
+  const sessionIndex = sessionStore(env);
   return {
     wikiStore,
     listPages: new ListPages(wikiStore),
@@ -63,7 +79,20 @@ export function createContainer(env: Env, overrides: ContainerOverrides = {}): C
     publishArtifact: new PublishArtifact(wikiStore, builder, systemClock),
     readArtifact: new ReadArtifact(wikiStore),
     listArtifacts: new ListArtifacts(wikiStore),
+    sessionIndex,
+    recordSessionActivity: new RecordSessionActivity(sessionIndex),
+    listSessions: new ListSessions(sessionIndex, systemClock),
+    renameSession: new RenameSession(sessionIndex),
+    removeSession: new RemoveSession(sessionIndex),
   };
+}
+
+function sessionStore(env: Env): SessionIndex {
+  const { UPSTASH_REDIS_REST_URL: url, UPSTASH_REDIS_REST_TOKEN: token } = env;
+  if (env.SESSIONS_STORE !== "memory" && url && token) {
+    return new UpstashSessionIndex({ url, token });
+  }
+  return new InMemorySessionIndex();
 }
 
 function brainStore(env: Env): WikiStore {
