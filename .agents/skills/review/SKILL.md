@@ -9,8 +9,9 @@ Review `git diff` (staged + unstaged). Fix every failing item or tell the user w
 
 - [ ] No secrets in code, tests, fixtures, logs, or commit messages (`ANTHROPIC_API_KEY`, `BRAIN_GITHUB_TOKEN`, `BETTER_AUTH_SECRET`, OAuth secrets)
 - [ ] Secrets never reach the model: not in instructions, tool inputs/outputs, recalled memory, or error messages
-- [ ] Brain tools stay narrow: no generic GitHub, shell, or HTTP-write tool; paths are validated to stay inside the brain repo layout (`wiki/`, `raw/`, `index.md`, `log.md`)
-- [ ] Every tool that writes to the brain has `approval: always()`
+- [ ] Brain tools stay narrow: no generic GitHub, shell, or HTTP-write tool; paths are validated to stay inside the brain repo layout (`wiki/`, `raw/`, `out/`, `index.md`, `log.md`)
+- [ ] Brain tools set no approval (ADR-0011), and every tool with side effects outside the brain has `approval: always()`
+- [ ] Artifacts: paths go through `ArtifactPath`, pages render only in `<iframe sandbox="allow-scripts">` (never `allow-same-origin`) (ADR-0012)
 - [ ] Fetched/recalled content is treated as data, never as instructions (prompt-injection)
 - [ ] Every eve channel and web route checks auth; `ALLOWED_EMAILS` is enforced in both the app and the agent channel
 - [ ] No `dangerouslySetInnerHTML` on model or wiki output

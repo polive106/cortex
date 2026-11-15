@@ -2,13 +2,13 @@
 
 ## Vision
 
-cortex is a home for several eve agents that share one **brain**: a Karpathy-style LLM wiki kept as Markdown in a separate private GitHub repo (`polive106/brain`). The first agent, **companion**, is a chat companion. You test it first in a private web UI and later bring it into Slack. It answers from the brain, citing pages. When it sees knowledge worth keeping, it proposes saving it, and writes to the wiki only after a human approves.
+cortex is a home for several eve agents that share one **brain**: a Karpathy-style LLM wiki kept as Markdown in a separate private GitHub repo (`polive106/brain`). The first agent, **companion**, is a chat companion. You test it first in a private web UI and later bring it into Slack. It answers from the brain, citing pages. When it sees knowledge worth keeping, it saves it as one revertable commit, and it builds HTML artifacts shown beside the chat.
 
 ## Principles
 
 - **The repo is agentic**: `AGENTS.md`, ADRs, skills, and hooks make the rules enforceable. Every commit is simplified, reviewed, and checked.
 - **Hexagonal core**: business logic lives in `@cortex/domain` with zero dependencies. eve tools are thin adapters.
-- **Humans own the brain**: the agent proposes, humans approve. Every write is one revertable git commit.
+- **The brain is git**: the agent writes without asking (ADR-0011), and every write is one revertable git commit.
 - **No fancy stuff**: no vector database, no PR flow, no custom design system until a real need shows up.
 
 ## Domain model
@@ -20,8 +20,9 @@ cortex is a home for several eve agents that share one **brain**: a Karpathy-sty
 | **IndexEntry** | One line in `index.md`: page path, title, one-line summary |
 | **LogEntry** | One append-only line in `log.md`: date, operation (ingest/query/lint), summary, commit |
 | **Changeset** | The full set of file writes for one ingest: source, pages, index, log. Applied as **one commit** |
-| **Ports** | `WikiStore` (read/list/search/commit), `SourceFetcher` (URL → text), `Clock` |
-| **Use-cases** | `ReadIndex`, `ReadPage`, `SearchWiki`, `ProposeIngest`, `ApplyIngest` |
+| **Ports** | `WikiStore` (read/list/search/commit), `SourceFetcher` (URL → text), `Clock`, `ArtifactBuilder` (HTML → CSS) |
+| **Artifact** | A self-contained HTML page under `out/` (`out/<project>/<slug>.html` or `out/<slug>.html`), styled with the shadcn design kit. Each publish is a new version |
+| **Use-cases** | `ReadIndex`, `ReadPage`, `SearchWiki`, `ProposeIngest`, `ApplyIngest`, `PublishArtifact`, `ReadArtifact`, `ListArtifacts` |
 
 ## Brain repo layout (`polive106/brain`)
 
@@ -31,6 +32,7 @@ index.md    catalog of every page with a one-line summary (recalled every turn)
 log.md      append-only record of ingests, queries, lints
 raw/        immutable sources (text only)
 wiki/       pages maintained by the agent
+out/        HTML artifacts, optionally grouped by project
 ```
 
 ## Epics
@@ -41,6 +43,7 @@ wiki/       pages maintained by the agent
 | [E2](./epic-02-companion-web/README.md) | Companion and web chat | Done |
 | [E3](./epic-03-brain/README.md) | Brain (Karpathy LLM wiki) | In Progress |
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
+| [E5](./epic-05-artifacts/README.md) | Artifacts | In Progress |
 
 ## Implementation order
 
@@ -64,12 +67,19 @@ wiki/       pages maintained by the agent
 17. E3-US05: wiki tools with approval on writes
 18. E3-US06: recall of AGENTS.md and index.md every turn
 19. E3-US07: URL fetching and pasted-text ingestion
-20. E3-US08: citations in answers and the web UI
-21. E3-US09: real-model behavior evals
-22. E4-US01: Slack channel via Vercel Connect
-23. E4-US02: mentions and DMs
-24. E4-US03: approvals in Slack
-25. E4-US04: "save this thread" ingestion
+20. E5-US01: brain writes without approval (before URL ingestion, so it lands on the new rule)
+21. E5-US02: artifact domain
+22. E5-US03: Tailwind artifact builder and artifact listing
+23. E5-US04: sandbox and shadcn design kit
+24. E5-US05: artifact tools and route
+25. E5-US06: artifact preview panel
+26. E5-US07: artifact flow evals and E2E
+27. E3-US08: citations in answers and the web UI
+28. E3-US09: real-model behavior evals
+29. E4-US01: Slack channel via Vercel Connect
+30. E4-US02: mentions and DMs
+31. E4-US03: approvals in Slack
+32. E4-US04: "save this thread" ingestion
 
 ## Later / ideas (not yet stories)
 

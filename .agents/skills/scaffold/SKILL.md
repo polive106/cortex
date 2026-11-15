@@ -52,14 +52,13 @@ The filename is the tool name the model sees (snake_case). A tool only: validate
 
 ```ts
 import { defineTool } from "eve/tools";
-import { always } from "eve/tools/approval";
 import { z } from "zod";
 import { container } from "../container";
 
 export default defineTool({
-  description: "Create or update a wiki page. Requires user approval.",
-  inputSchema: z.object({ path: z.string(), content: z.string(), reason: z.string() }),
-  approval: always(), // any tool that writes to the brain
+  description: "Create or update a wiki page.",
+  inputSchema: z.object({ path: z.string(), content: z.string() }),
+  // Brain writes take no approval (ADR-0011); a side effect outside the brain needs `approval: always()`.
   async execute(input) {
     try {
       return await container().applyIngest.execute(input);

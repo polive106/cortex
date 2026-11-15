@@ -28,7 +28,7 @@ const systemClock: Clock = { now: () => new Date() };
  * and BRAIN_REPO ("owner/repo") set, the brain is the GitHub repo (ADR-0005). Otherwise it's an
  * in-memory brain seeded with the starter files, which lasts as long as the server process.
  * BRAIN_STORE=memory forces the in-memory brain, so flow evals and E2E never touch the real repo.
- * Hosted builds without GitHub settings get a read-only brain: an approved write would vanish
+ * Hosted builds without GitHub settings get a read-only brain: a write would vanish
  * with the server, so it's refused instead.
  */
 export function createContainer(env: Env): Container {

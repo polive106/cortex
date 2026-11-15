@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-11-14)
+Accepted (2026-11-14). Amended by 0011 (writes no longer need approval).
 
 ## Context
 

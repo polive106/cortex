@@ -60,13 +60,21 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 
 **Build order for a feature:** domain → adapters → agent tools/memory → web → evals and E2E.
 
-## Brain rules (ADR-0004, ADR-0005)
+## Brain rules (ADR-0004, ADR-0005, ADR-0011)
 
-- Agents get only the **narrow wiki tools** (`list_pages`, `read_page`, `search_wiki`, `write_page`). Never add general GitHub tools.
-- `write_page` **always requires human approval** (`approval: always()`).
-- One approved ingest = **one commit** covering `raw/`, the pages, `index.md`, and `log.md`. Merge into existing pages instead of appending duplicates.
+- Agents get only the **narrow brain tools** (`list_pages`, `read_page`, `search_wiki`, `write_page`, `list_artifacts`, `open_artifact`, `publish_artifact`). Never add general GitHub tools.
+- Brain writes need **no approval** (ADR-0011): no brain tool sets `approval`. The reply says what was saved and where. Tools with side effects outside the brain still need approval.
+- One ingest = **one commit** covering `raw/`, the pages, `index.md`, and `log.md`. Merge into existing pages instead of appending duplicates.
 - Wiki paths are validated by `PagePath` (`wiki/<kebab>.md`) and nothing may escape `wiki/`.
 - Credentials (`BRAIN_GITHUB_TOKEN`, API keys) live in server-side env vars and **never** enter prompts, tool inputs, or tool results.
+
+## Artifact rules (ADR-0012)
+
+- Artifacts live at `out/<project>/<slug>.html` or `out/<slug>.html`, validated by `ArtifactPath`. One publish = one version = one commit (the file plus `log.md`).
+- The agent writes `artifacts/<slug>/index.html` in its sandbox from the design kit (`agents/companion/agent/lib/design-kit.ts`, written to `design/`). The kit's tokens must match `apps/web/app/globals.css` (a test checks).
+- Pages are self-contained: the domain adds the CSP and the compiled CSS, and refuses external scripts, stylesheets, frames, and `<base>`.
+- Tool outputs carry only path, version, and ref. The web panel fetches the page from `GET /eve/<agent>/artifacts?path&ref` and shows it only in `<iframe sandbox="allow-scripts" srcdoc>`. Never add `allow-same-origin`.
+- After upgrading `tailwindcss`, regenerate the embedded base CSS with `pnpm sync:tailwind`.
 
 ## Frontend rules (ADR-0003)
 
@@ -129,7 +137,7 @@ pnpm test:watch         # TDD loop
 
 ## Environment variables
 
-Without `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`, the brain is in memory, seeded from `agents/companion/agent/lib/starter-brain.ts`. Hosted builds make that brain read-only, so approved writes can't vanish.
+Without `BRAIN_GITHUB_TOKEN` and `BRAIN_REPO`, the brain is in memory, seeded from `agents/companion/agent/lib/starter-brain.ts`. Hosted builds make that brain read-only, so writes can't vanish.
 
 Local values go in the root `.env.local` (gitignored; `eve link` also writes `VERCEL_OIDC_TOKEN` there). Deployed values are Vercel env vars, marked sensitive. Never print them.
 

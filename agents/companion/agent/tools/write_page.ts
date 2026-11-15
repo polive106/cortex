@@ -1,6 +1,4 @@
-import { ingestPaths } from "@cortex/domain";
 import { defineTool } from "eve/tools";
-import { always } from "eve/tools/approval";
 import { z } from "zod";
 import { container } from "../container";
 import { wikiResult } from "../lib/wiki-result";
@@ -29,32 +27,13 @@ const inputSchema = z.object({
       }),
     )
     .min(1),
-  reason: z.string().min(1).describe("Why this is worth keeping, shown to the approver"),
 });
 
-/** The approval prompt names the exact paths the write would touch, or why it can't. */
-const describeTargets = (pages: { path?: string; title: string }[]) => {
-  try {
-    return ingestPaths({ pages: pages.map((page) => ({ ...page, summary: "", body: "" })) }).join(
-      ", ",
-    );
-  } catch (error) {
-    return `(${(error as Error).message})`; // ingestPaths throws only domain errors
-  }
-};
-
+// No approval (ADR-0011): every write is one commit, and git revert is the undo.
 export default defineTool({
   description:
-    "Save knowledge to the brain: the raw source plus created or updated pages, as one commit. A person must approve every call.",
+    "Save knowledge to the brain: the raw source plus created or updated pages, as one commit. It saves immediately; tell the person what you saved.",
   inputSchema,
-  approval: {
-    request: always(),
-    // The card also lists every input field in full; this line is the at-a-glance summary.
-    prompt: ({ input }) =>
-      `Write to the brain: ${describeTargets(input.pages)} (${input.reason}). Pages: ${input.pages
-        .map((page) => `${page.title} — ${page.summary}`)
-        .join("; ")}`,
-  },
   async execute({ source, pages }) {
     return wikiResult(async () => {
       const result = await container().ingest.execute({ source, pages });

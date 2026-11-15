@@ -16,7 +16,6 @@ type Reply = MockModelResponse | string;
 const note = (word: string, path?: string) => ({
   source: { title: `Note ${word}`, origin: "pasted", text: `About ${word}.` },
   pages: [{ path, title: `Note ${word}`, summary: `About ${word}`, body: `All about ${word}.\n` }],
-  reason: "flow eval",
 });
 
 function afterTool({ name, output, isError }: MockModelRequest["toolResults"][number]): Reply {

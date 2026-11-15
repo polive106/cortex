@@ -38,4 +38,4 @@ playwright.config.ts
 
 ## Must-have scenarios per feature
 
-Happy path, validation error, unauthorized user (not on `ALLOWED_EMAILS`) is rejected, and for brain writes: approve → page cited; deny → nothing written.
+Happy path, validation error, unauthorized user (not on `ALLOWED_EMAILS`) is rejected, and for brain writes: page saved and cited; a path outside wiki/ refused.
