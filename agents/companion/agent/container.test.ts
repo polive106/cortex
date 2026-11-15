@@ -27,6 +27,16 @@ describe("createContainer session index (ADR-0013)", () => {
     expect(createContainer(upstash).sessionIndex).toBeInstanceOf(UpstashSessionIndex);
   });
 
+  it("also reads the Vercel Marketplace names, KV_REST_API_URL and KV_REST_API_TOKEN", () => {
+    const kv = { KV_REST_API_URL: "https://db.upstash.io", KV_REST_API_TOKEN: "t" };
+    expect(createContainer(kv).sessionIndex).toBeInstanceOf(UpstashSessionIndex);
+    const onlyKvUrl = { KV_REST_API_URL: kv.KV_REST_API_URL };
+    expect(createContainer(onlyKvUrl).sessionIndex).toBeInstanceOf(InMemorySessionIndex);
+    expect(createContainer({ ...kv, SESSIONS_STORE: "memory" }).sessionIndex).toBeInstanceOf(
+      InMemorySessionIndex,
+    );
+  });
+
   it("SESSIONS_STORE=memory forces the in-memory index", () => {
     const env = { ...upstash, SESSIONS_STORE: "memory" };
     expect(createContainer(env).sessionIndex).toBeInstanceOf(InMemorySessionIndex);

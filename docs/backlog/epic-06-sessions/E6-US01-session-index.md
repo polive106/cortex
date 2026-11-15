@@ -9,7 +9,7 @@
 - [x] Use-cases `RecordSessionActivity`, `ListSessions`, `RenameSession`, `RemoveSession`; rename and remove raise `SessionNotFoundError` for another owner's or a missing session
 - [x] Recording keeps an existing title (a rename is never overwritten) and bumps `updatedAt`
 - [x] `InMemorySessionIndex` and `UpstashSessionIndex` pass one contract suite; Upstash is tested with msw and its token never appears in errors
-- [x] `container.ts` picks Upstash when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set, unless `SESSIONS_STORE=memory`
+- [x] `container.ts` picks Upstash when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (or the Marketplace's `KV_REST_API_URL` and `KV_REST_API_TOKEN`) are set, unless `SESSIONS_STORE=memory`
 
 **Technical Tasks**:
 

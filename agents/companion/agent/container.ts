@@ -62,7 +62,9 @@ const systemClock: Clock = { now: () => new Date() };
  * with the server, so it's refused instead.
  *
  * The session index (ADR-0013) is Upstash Redis with UPSTASH_REDIS_REST_URL and
- * UPSTASH_REDIS_REST_TOKEN set, and in memory otherwise or with SESSIONS_STORE=memory.
+ * UPSTASH_REDIS_REST_TOKEN set, or KV_REST_API_URL and KV_REST_API_TOKEN (the names the Vercel
+ * Marketplace integration writes with the KV prefix). It's in memory otherwise, or with
+ * SESSIONS_STORE=memory.
  */
 export function createContainer(env: Env, overrides: ContainerOverrides = {}): Container {
   const wikiStore = brainStore(env);
@@ -88,7 +90,8 @@ export function createContainer(env: Env, overrides: ContainerOverrides = {}): C
 }
 
 function sessionStore(env: Env): SessionIndex {
-  const { UPSTASH_REDIS_REST_URL: url, UPSTASH_REDIS_REST_TOKEN: token } = env;
+  const url = env.UPSTASH_REDIS_REST_URL || env.KV_REST_API_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN || env.KV_REST_API_TOKEN;
   if (env.SESSIONS_STORE !== "memory" && url && token) {
     return new UpstashSessionIndex({ url, token });
   }

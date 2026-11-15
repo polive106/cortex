@@ -156,7 +156,7 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `BRAIN_GITHUB_TOKEN` | local, production, preview | Fine-grained token for `polive106/brain`, Contents read/write (ADR-0005). Read only in `container.ts` |
 | `BRAIN_REPO` | local, production, preview | `owner/repo` of the brain, e.g. `polive106/brain`. With the token, it switches the brain to GitHub |
 | `BRAIN_BRANCH` | optional | Defaults to `main` |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | local, production, preview (written by the Vercel Marketplace Upstash integration) | The session index in Upstash Redis (ADR-0013). Without both, the index is in memory and forgets entries on restart. Read only in `container.ts` |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | production, preview (written by the Vercel Marketplace Upstash integration, prefix `KV`) | The session index in Upstash Redis (ADR-0013). `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` work too and take precedence. Without a URL and token, the index is in memory and forgets entries on restart. Read only in `container.ts` |
 | `SESSIONS_STORE` | scripts | `memory` forces the in-memory session index. Set by `pnpm eval`, `pnpm eval:real`, and E2E |
 | `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE` | optional, local | Chromium for E2E when the installed one doesn't match Playwright (e.g. `/opt/pw-browsers/chromium` in Claude Code cloud sessions) |
