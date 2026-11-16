@@ -13,7 +13,7 @@ import {
 import { useEveAgent } from "eve/react";
 import { AlertCircleIcon, BrainIcon, PlusIcon, SquareIcon } from "lucide-react";
 import { useRef, useState } from "react";
-import { WEB_CHAT_AGENT } from "@/app/eve-agent";
+import { CHAT_AGENT } from "@/app/chat-agent";
 import {
   Conversation,
   ConversationContent,
@@ -38,9 +38,6 @@ import { SessionHistory } from "@/src/features/sessions";
 import { AgentMessage } from "./agent-message";
 
 const DEFAULT_AGENT_NAME = "eve-agent";
-// E2E points the UI at the mockModel double. eve's installer rewrites eve-agent.ts, so the
-// override lives here.
-const CHAT_AGENT = process.env.NEXT_PUBLIC_WEB_CHAT_AGENT ?? WEB_CHAT_AGENT;
 const AGENT_NAME = CHAT_AGENT ?? DEFAULT_AGENT_NAME;
 
 export function AgentChat({

@@ -17,6 +17,10 @@ export class ReadOnlyWikiStore implements WikiStore {
     return this.inner.readFile(path, ref);
   }
 
+  head(): Promise<string> {
+    return this.inner.head();
+  }
+
   listPages(): Promise<string[]> {
     return this.inner.listPages();
   }

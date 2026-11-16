@@ -85,6 +85,12 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 - The global hook `agents/companion/agent/hooks/session-index.ts` records web channel sessions on `delivery.consumed`. The title comes from the first message and is set only once, so a later turn never overwrites a rename. If recording fails, the error is logged and the chat isn't affected.
 - `/eve/<agent>/sessions` (behind `WEB_AUTH`, mounted by `vercel.ts`) serves `GET`, `PATCH ?id=` `{ title }`, and `DELETE ?id=`. Delete ends the eve session first, then removes the entry.
 
+## Brain graph rules (ADR-0015)
+
+- `/brain` draws the brain from `GET /eve/<agent>/brain/graph` (behind `WEB_AUTH`, mounted by `vercel.ts`). `BrainGraph` in the domain parses page links; don't parse them anywhere else.
+- The head commit (`WikiStore.head()`) is the ETag: the web polls every 5 s with `If-None-Match`, and `ReadBrainGraph` rebuilds only when the head moves.
+- `BRAIN_SEED=sample` (with the in-memory brain) seeds `agents/companion/agent/lib/sample-brain.ts`, a linked example brain for demos and screenshots.
+
 ## Frontend rules (ADR-0003)
 
 `apps/web/src/features/<feature>/`:
@@ -162,6 +168,7 @@ Local values go in the root `.env.local` (gitignored; `eve link` also writes `VE
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | production, preview (written by the Vercel Marketplace Upstash integration, prefix `KV`) | The session index in Upstash Redis (ADR-0013). `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` work too and take precedence. Without a URL and token, the index is in memory and forgets entries on restart. Read only in `container.ts` |
 | `SESSIONS_STORE` | scripts | `memory` forces the in-memory session index. Set by `pnpm eval`, `pnpm eval:real`, and E2E |
 | `SOURCE_FETCHER` | scripts | `memory` serves the sample pages in `agents/companion/agent/lib/sample-sources.ts` instead of fetching from the web. Set by `pnpm eval`, `pnpm eval:real`, and E2E |
+| `BRAIN_SEED` | optional, local | `sample` seeds the in-memory brain with a linked example brain, for brain graph demos (ADR-0015) |
 | `BRAIN_STORE` | scripts | `memory` forces the in-memory brain. Set by `pnpm eval`, `pnpm eval:real`, and E2E so they never touch the real repo |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE` | optional, local | Chromium for E2E when the installed one doesn't match Playwright (e.g. `/opt/pw-browsers/chromium` in Claude Code cloud sessions) |
 | `BETTER_AUTH_SECRET`, `VERCEL_APP_CLIENT_ID`, `VERCEL_APP_CLIENT_SECRET` | production, preview (written by `eve add channel/web`) | Sign in with Vercel; production fails closed without them |

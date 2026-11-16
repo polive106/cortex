@@ -18,10 +18,10 @@ const config = await withEve({
 });
 
 // withEve forwards only /eve/<name>/v1/* to an agent. Agents also serve GET /artifacts
-// (ADR-0012) and /sessions (ADR-0013), so mount each at /eve/<name>/<path> the same way: a
+// (ADR-0012), /sessions (ADR-0013) and GET /brain/graph (E7-US01), so mount each at /eve/<name>/<path> the same way: a
 // top-level route to the service, and a service route that rewrites the path. The mount comes
 // from withEve's own v1 route, so it follows withEve's naming.
-const AGENT_PATHS = ["/artifacts", "/sessions"];
+const AGENT_PATHS = ["/artifacts", "/sessions", "/brain/graph"];
 const V1_ROUTE = /^\^(\/eve\/[a-z0-9_-]+)\/v1\/\(\.\*\)\$$/;
 type Service = { routes?: { src?: string; transforms?: unknown[] }[] };
 

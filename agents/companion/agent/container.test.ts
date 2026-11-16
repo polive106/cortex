@@ -100,6 +100,14 @@ describe("createContainer", () => {
     expect(createContainer(env).wikiStore).toBeInstanceOf(InMemoryWikiStore);
   });
 
+  it("BRAIN_SEED=sample seeds the in-memory brain with the linked example (E7-US01)", async () => {
+    const c = createContainer({ BRAIN_STORE: "memory", BRAIN_SEED: "sample" });
+    await expect(c.listPages.execute()).resolves.toContain("wiki/seed-round.md");
+    const { graph } = await c.readBrainGraph.execute();
+    expect(graph.edges.length).toBeGreaterThan(30);
+    await expect(createContainer({}).listPages.execute()).resolves.toEqual(["wiki/welcome.md"]);
+  });
+
   it("is read-only in hosted builds without GitHub settings, so writes can't silently vanish", () => {
     for (const VERCEL_ENV of ["production", "preview"]) {
       expect(createContainer({ VERCEL_ENV }).wikiStore).toBeInstanceOf(ReadOnlyWikiStore);

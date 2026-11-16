@@ -62,6 +62,14 @@ export class GitHubWikiStore implements WikiStore {
     return response.ok ? response.text() : null;
   }
 
+  async head(): Promise<string> {
+    const ref = await this.json<{ object: { sha: string } }>(
+      "GET",
+      `/git/ref/heads/${this.branch}`,
+    );
+    return ref.object.sha;
+  }
+
   async listPages(): Promise<string[]> {
     const paths = await this.treePaths(this.branch);
     return paths.filter(isPagePath).sort();
@@ -88,9 +96,7 @@ export class GitHubWikiStore implements WikiStore {
 
   async commit(changeset: Changeset, message: string): Promise<CommitResult> {
     if (changeset.isEmpty) throw new Error("Refusing to commit an empty changeset");
-    const head = (
-      await this.json<{ object: { sha: string } }>("GET", `/git/ref/heads/${this.branch}`)
-    ).object.sha;
+    const head = await this.head();
     const needsCheck = changeset.files.some((file) => file.mustNotExist);
     // A commit sha works as a tree-ish, so the precondition listing needn't wait for GET commit.
     const [baseCommit, existing] = await Promise.all([

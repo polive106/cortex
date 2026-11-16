@@ -14,6 +14,7 @@ describe("ReadOnlyWikiStore", () => {
   it("reads through to the wrapped store", async () => {
     await expect(store.readFile("index.md")).resolves.toBe("i");
     await expect(store.listPages()).resolves.toEqual(["wiki/a.md"]);
+    await expect(store.head()).resolves.toBe("memory-0");
     await expect(store.readPages()).resolves.toEqual([{ path: "wiki/a.md", content: "alpha" }]);
     await expect(store.listArtifacts()).resolves.toEqual(["out/plan.html"]);
     await expect(store.readFile("index.md", "unknown-ref")).resolves.toBeNull();

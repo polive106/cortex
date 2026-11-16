@@ -19,6 +19,10 @@ export class FakeWikiStore implements WikiStore {
     return files?.[path] ?? null;
   }
 
+  async head(): Promise<string> {
+    return `commit-${this.commits.length}`;
+  }
+
   async listPages(): Promise<string[]> {
     return Object.keys(this.files).filter(isPagePath).sort();
   }
