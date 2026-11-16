@@ -1,6 +1,6 @@
 # E3: Brain (Karpathy LLM wiki)
 
-The companion reads from and, with approval, writes to a Karpathy-style LLM wiki in the private `polive106/brain` repo:
+The companion reads from and writes to (without approval, ADR-0011) a Karpathy-style LLM wiki in the private `polive106/brain` repo:
 - `AGENTS.md` and `index.md` are recalled every turn, and pages are opened on demand.
 - Answers cite pages.
 - Ingestion (pasted text or a URL) saves the raw source, merges it into pages, updates the index and log, and commits once to `main`.
@@ -13,6 +13,6 @@ The companion reads from and, with approval, writes to a Karpathy-style LLM wiki
 | E3-US04 | In-memory and GitHub wiki store adapters | L | Done |
 | E3-US05 | Wiki tools with approval on writes | M | Done |
 | E3-US06 | Recall of AGENTS.md and index.md every turn | M | Done |
-| E3-US07 | URL fetching and pasted-text ingestion | M | Pending |
-| E3-US08 | Citations in answers and the web UI | S | Pending |
+| E3-US07 | URL fetching and pasted-text ingestion | M | Done |
+| E3-US08 | Citations in answers and the web UI | S | Done |
 | E3-US09 | Real-model behavior evals | M | Pending |

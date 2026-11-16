@@ -32,7 +32,9 @@ export interface IngestResult {
 /**
  * Turns a source and its pages into one commit: the immutable raw source, created or updated
  * pages, the index line per page, and a log entry (ADR-0004). It reads the brain once, plans,
- * and commits. If the brain moved under the commit, it re-reads and re-plans once.
+ * and commits. If the brain moved under the commit, it re-reads and re-plans once. A source
+ * never overwrites another: when its raw/ name is taken (the same title saved twice in a day),
+ * it gets the next free number.
  */
 export class Ingest {
   constructor(
@@ -44,7 +46,7 @@ export class Ingest {
     try {
       return await this.attempt(request);
     } catch (error) {
-      if (!(error instanceof ConflictError) || error instanceof ImmutableSourceError) throw error;
+      if (!(error instanceof ConflictError)) throw error;
       return this.attempt(request);
     }
   }
@@ -52,23 +54,22 @@ export class Ingest {
   private async attempt(request: IngestRequest): Promise<IngestResult> {
     const now = this.clock.now();
     const today = isoDate(now);
+    const targets = pageTargets(request);
+
+    // One round trip: everything this ingest checks or rewrites.
+    const [existingSource, indexFile, logFile, ...existingPages] = await Promise.all([
+      this.store.readFile(SourcePath.forTitle(now, request.source.title).value),
+      this.store.readFile("index.md"),
+      this.store.readFile("log.md"),
+      ...targets.map(({ path }) => this.store.readFile(path.value)),
+    ]);
     const source = new Source({
-      path: SourcePath.forTitle(now, request.source.title),
+      path: await this.freeSourcePath(now, request.source.title, existingSource === null),
       title: request.source.title,
       origin: request.source.origin,
       captured: today,
       text: request.source.text,
     });
-    const targets = pageTargets(request);
-
-    // One round trip: everything this ingest checks or rewrites.
-    const [existingSource, indexFile, logFile, ...existingPages] = await Promise.all([
-      this.store.readFile(source.path.value),
-      this.store.readFile("index.md"),
-      this.store.readFile("log.md"),
-      ...targets.map(({ path }) => this.store.readFile(path.value)),
-    ]);
-    if (existingSource !== null) throw new ImmutableSourceError(source.path.value);
 
     const changes = targets.map(({ input, path }, i) => {
       const existing = existingPages[i] ?? null;
@@ -108,13 +109,26 @@ export class Ingest {
     const { ref }: CommitResult = await this.store.commit(changeset, `ingest: ${source.title}`);
     return { ref, source: source.path.value, changes: lines };
   }
-}
 
-class ImmutableSourceError extends ConflictError {
-  constructor(path: string) {
-    super(`${path} already exists, and sources in raw/ are immutable`);
+  /**
+   * The first raw/ name for this title and day not taken yet; whether the first is, is known.
+   * Later numbers are checked a batch at a time, in parallel, so a repeat costs one round trip.
+   */
+  private async freeSourcePath(now: Date, title: string, firstFree: boolean): Promise<SourcePath> {
+    if (firstFree) return SourcePath.forTitle(now, title);
+    for (let start = 2; ; start += SOURCE_PROBE_BATCH) {
+      const paths = Array.from({ length: SOURCE_PROBE_BATCH }, (_, i) =>
+        SourcePath.forTitle(now, title, start + i),
+      );
+      const found = await Promise.all(paths.map((path) => this.store.readFile(path.value)));
+      const free = found.indexOf(null);
+      if (free !== -1) return paths[free] as SourcePath;
+    }
   }
 }
+
+/** How many numbered raw/ names one round trip checks. */
+const SOURCE_PROBE_BATCH = 4;
 
 function pageTargets(request: Pick<IngestRequest, "pages">) {
   if (request.pages.length === 0) throw new InvalidIngestError("An ingest needs at least one page");

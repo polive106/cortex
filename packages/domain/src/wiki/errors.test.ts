@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BlockedAddressError,
   ConflictError,
   InvalidPathError,
   PageNotFoundError,
@@ -21,12 +22,21 @@ describe("wiki errors", () => {
       "SourceFetchError",
       "Could not fetch https://x.test: HTTP 500",
     ],
+    [
+      new BlockedAddressError("http://10.0.0.1/", "10.0.0.1"),
+      "BlockedAddressError",
+      "Could not fetch http://10.0.0.1/: 10.0.0.1 is a private or local address",
+    ],
     [new ConflictError("raw/a.md already exists"), "ConflictError", "raw/a.md already exists"],
     [new ReadOnlyBrainError("not connected"), "ReadOnlyBrainError", "not connected"],
   ])("%s has a stable name and a model-readable message", (error, name, message) => {
     expect(error).toBeInstanceOf(WikiError);
     expect(error.name).toBe(name);
     expect(error.message).toBe(message);
+  });
+
+  it("a blocked address is a fetch error", () => {
+    expect(new BlockedAddressError("http://x/", "x")).toBeInstanceOf(SourceFetchError);
   });
 
   it("keeps the offending path for callers", () => {

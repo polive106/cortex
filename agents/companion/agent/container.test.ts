@@ -1,6 +1,8 @@
 import {
   GitHubWikiStore,
+  HttpSourceFetcher,
   InMemorySessionIndex,
+  InMemorySourceFetcher,
   InMemoryWikiStore,
   ReadOnlyWikiStore,
   UpstashSessionIndex,
@@ -10,6 +12,21 @@ import { container, createContainer, useContainer } from "./container";
 import { DESIGN_KIT_FILES } from "./lib/design-kit";
 
 afterEach(() => useContainer(undefined));
+
+describe("createContainer source fetcher (E3-US07)", () => {
+  it("fetches from the web by default", () => {
+    expect(createContainer({}).sourceFetcher).toBeInstanceOf(HttpSourceFetcher);
+  });
+
+  it("SOURCE_FETCHER=memory serves the sample pages and never touches the network", async () => {
+    const c = createContainer({ SOURCE_FETCHER: "memory" });
+    expect(c.sourceFetcher).toBeInstanceOf(InMemorySourceFetcher);
+    await expect(c.fetchSource.execute("https://example.com/post")).resolves.toMatchObject({
+      url: "https://example.com/post",
+      title: "Shipping on Fridays",
+    });
+  });
+});
 
 describe("createContainer session index (ADR-0013)", () => {
   const upstash = {

@@ -8,6 +8,12 @@ const IMG_SRC =
 const nextConfig: NextConfig = {
   // Workspace packages ship TypeScript source.
   transpilePackages: ["@cortex/domain"],
+  // Citations link to the brain the agent reads (E3-US08): the same settings, built into the
+  // client. A repo name and a branch, never a credential.
+  env: {
+    BRAIN_REPO: process.env.BRAIN_REPO ?? "",
+    BRAIN_BRANCH: process.env.BRAIN_BRANCH ?? "",
+  },
   async headers() {
     return [{ source: "/:path*", headers: [{ key: "Content-Security-Policy", value: IMG_SRC }] }];
   },

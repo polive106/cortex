@@ -27,6 +27,13 @@ export class SourceFetchError extends WikiError {
   }
 }
 
+/** The URL, or an address its host resolves to, is private or local (SSRF guard, E3-US07). */
+export class BlockedAddressError extends SourceFetchError {
+  constructor(url: string, host: string) {
+    super(url, `${host} is a private or local address`);
+  }
+}
+
 /** The brain changed underneath us, or a write would break an invariant (immutable raw/). */
 export class ConflictError extends WikiError {}
 

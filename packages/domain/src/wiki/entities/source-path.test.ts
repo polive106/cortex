@@ -16,6 +16,16 @@ describe("SourcePath", () => {
     );
   });
 
+  it("numbers later sources with the same title and day", () => {
+    const date = new Date("2026-11-14T00:00:00Z");
+    expect(SourcePath.forTitle(date, "Deploy notes", 1).value).toBe(
+      "raw/2026-11-14-deploy-notes.md",
+    );
+    expect(SourcePath.forTitle(date, "Deploy notes", 3).value).toBe(
+      "raw/2026-11-14-deploy-notes-3.md",
+    );
+  });
+
   it.each([
     ["outside raw/", "wiki/2026-11-14-a.md"],
     ["no date", "raw/notes.md"],

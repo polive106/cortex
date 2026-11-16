@@ -8,6 +8,8 @@ import { type MockModelRequest, type MockModelResponse, mockModel } from "eve/ev
 // - "save note <word>" calls write_page for wiki/note-<word>.md;
 // - "save outside" calls write_page for AGENTS.md, which must be refused;
 // - "read note <word>" calls read_page for wiki/note-<word>.md;
+// - "save url <url>" calls fetch_source, then write_page with the page under its URL (E3-US07);
+// - "cite welcome" reads wiki/welcome.md and answers citing it (E3-US08);
 // - "what is indexed" reports the first index entry from recalled memory (E3-US06);
 // - "make artifact <slug>" / "revise artifact <slug>" write artifacts/<slug>/index.html with bash,
 //   then call publish_artifact (E5-US07);
@@ -47,6 +49,9 @@ function afterTool(
     body?: string;
     path?: string;
     version?: number;
+    url?: string;
+    title?: string;
+    text?: string;
   };
   if (name === "bash") {
     return {
@@ -60,7 +65,16 @@ function afterTool(
   }
   if (isError) return `OK, I won't use ${name}.`;
   if (result.error) return `Refused: ${result.error}: ${result.message}`;
+  if (name === "fetch_source") {
+    const { url = "", title = "", text = "" } = result;
+    const page = { title, summary: `From ${url}`, body: `${text}\n` };
+    const source = { title, origin: url, text };
+    return { toolCalls: [{ name: "write_page", input: { source, pages: [page] } }] };
+  }
   if (name === "write_page") return `Saved: ${result.changes?.join(", ")}`;
+  if (name === "read_page" && result.path === "wiki/welcome.md") {
+    return `The brain is where the team keeps what it knows ([${result.title}](wiki/welcome.md)).`;
+  }
   if (name === "read_page") return `Page: ${result.body?.trim()}`;
   if (name === "publish_artifact") return `Published: ${result.path} v${result.version}`;
   return `Done: ${name}`;
@@ -84,6 +98,10 @@ function respond({ lastUserMessage, messages, toolResults }: MockModelRequest): 
   if (verb === "save" && kind === "note") {
     return { toolCalls: [{ name: "write_page", input: note(word) }] };
   }
+  if (verb === "save" && kind === "url") {
+    const url = (lastUserMessage ?? "").trim().split(/\s+/)[2] ?? "";
+    return { toolCalls: [{ name: "fetch_source", input: { url } }] };
+  }
   if (verb === "read" && kind === "note") {
     return { toolCalls: [{ name: "read_page", input: { path: `wiki/note-${word}.md` } }] };
   }
@@ -94,6 +112,9 @@ function respond({ lastUserMessage, messages, toolResults }: MockModelRequest): 
     return {
       toolCalls: [{ name: "publish_artifact", input: { slug: "missing", title: "Missing" } }],
     };
+  }
+  if (message === "cite welcome") {
+    return { toolCalls: [{ name: "read_page", input: { path: "wiki/welcome.md" } }] };
   }
   if (message === "what is indexed") {
     const index = messages.find((m) => m.text.includes("<brain_index"))?.text ?? "";

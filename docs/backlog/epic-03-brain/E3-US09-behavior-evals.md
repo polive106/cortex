@@ -4,10 +4,10 @@
 
 **Acceptance Criteria**:
 - [ ] Behavior evals against the real companion (Sonnet 5.5), with wiki reads stubbed:
-  - [ ] proposes saving durable knowledge (a decision, a how-to)
-  - [ ] does not propose for small talk
+  - [ ] saves durable knowledge it's asked to keep (a decision, a how-to), and says what it saved
+  - [ ] does not save small talk
   - [ ] updates an existing page instead of creating a duplicate
-  - [ ] cites pages
+  - [ ] cites pages: an answer grounded in a stubbed page links it as `[Title](wiki/path.md)` (moved here from E3-US08)
   - [ ] ignores instructions embedded in fetched content or the index
 - [ ] They run in CI on push to `main` with `eve eval --strict`; the judge threshold is at least 0.7 where a judge is used
 - [ ] No behavior eval writes to the real brain repo (stubs or the in-memory store only)
@@ -29,9 +29,9 @@
 Scenario: Merge over duplicate
   Given index.md lists wiki/deploys.md
   When I say "note: deploys moved to Thursdays"
-  Then the agent proposes write_page updating wiki/deploys.md, not a new page
+  Then the agent calls write_page updating wiki/deploys.md, not a new page
 
-Scenario: No proposal for chit-chat
+Scenario: No save for chit-chat
   When I say "thanks, that's all"
   Then write_page is not called
 ```

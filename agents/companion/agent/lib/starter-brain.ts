@@ -12,7 +12,8 @@ be reverted. These rules say how pages are written. Companion reads them on ever
 
 - \`wiki/\` holds the pages companion maintains. It is the only place pages live.
 - \`raw/\` holds immutable sources: pasted text, fetched pages, Slack threads. Never edit a file
-  here; a new version of a source is a new file.
+  here; a new version of a source is a new file. A second source with the same title on the same
+  day gets the next number: \`raw/2026-11-14-deploy-notes-2.md\`.
 - \`index.md\` has one line per page and stays in sync with \`wiki/\`.
 - \`log.md\` is an append-only record of every ingest, query, and lint.
 

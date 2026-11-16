@@ -1,7 +1,6 @@
 ---
 name: story-complete
 description: Verify a story is really done (criteria, tests, evals, docs) and update its status everywhere.
-disable-model-invocation: true
 ---
 
 ## Steps
