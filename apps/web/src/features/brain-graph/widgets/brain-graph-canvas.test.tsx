@@ -1,7 +1,13 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { GraphNode, TrailStep } from "../api";
-import { BrainGraphCanvas, type BrainGraphCanvasProps } from "./brain-graph-canvas";
+import { type GraphNode, nodeRadius, type TrailStep } from "../api";
+import { BrainGraphCanvas, type BrainGraphCanvasProps, labelScale } from "./brain-graph-canvas";
+
+// A spy that still sizes nodes: each call is one node drawn by the graph layer.
+vi.mock("../api", async (original) => {
+  const api = await original<typeof import("../api")>();
+  return { ...api, nodeRadius: vi.fn(api.nodeRadius) };
+});
 
 afterEach(cleanup);
 
@@ -139,8 +145,10 @@ describe("BrainGraphCanvas", () => {
 
   it("enlarges labels when zoomed out", () => {
     show({ transform: { x: 0, y: 0, k: 0.25 } });
-    const label = screen.getByTestId("brain-node-a").querySelector("text");
-    expect(Number(label?.getAttribute("font-size"))).toBeCloseTo(23.4);
+    const root = document.querySelector("svg > g") as SVGGElement;
+    expect(root.style.getPropertyValue("--label-scale")).toBe("1.8");
+    const label = screen.getByTestId("brain-node-a").querySelector("text") as SVGTextElement;
+    expect(label.style.fontSize).toBe("calc(13px * var(--label-scale, 1))");
   });
 
   it("reports hover, open (click or Enter), and pointer gestures", () => {
@@ -164,5 +172,30 @@ describe("BrainGraphCanvas", () => {
     expect(props.onPointerDown).toHaveBeenCalled();
     expect(props.onPointerMove).toHaveBeenCalled();
     expect(props.onPointerUp).toHaveBeenCalled();
+  });
+
+  it("moves and zooms the view without redrawing the graph", () => {
+    const { props, rerender, container } = show();
+    const drawn = vi.mocked(nodeRadius).mock.calls.length;
+    rerender(<BrainGraphCanvas {...props} transform={{ x: 50, y: -20, k: 1.1 }} />);
+    expect(vi.mocked(nodeRadius).mock.calls.length).toBe(drawn);
+    expect(container.querySelector("svg > g")?.getAttribute("transform")).toBe(
+      "translate(450 280) scale(1.1)",
+    );
+    // Zooming out grows the labels through a CSS variable, still without a redraw.
+    rerender(<BrainGraphCanvas {...props} transform={{ x: 0, y: 0, k: 0.25 }} />);
+    expect(vi.mocked(nodeRadius).mock.calls.length).toBe(drawn);
+    const root = container.querySelector("svg > g") as SVGGElement;
+    expect(root.style.getPropertyValue("--label-scale")).toBe("1.8");
+  });
+});
+
+describe("labelScale", () => {
+  it("grows labels as the view zooms out, up to a cap, and never shrinks them", () => {
+    expect(labelScale(4)).toBe(1);
+    expect(labelScale(1)).toBe(1);
+    expect(labelScale(0.64)).toBeCloseTo(1.25);
+    expect(labelScale(0.25)).toBe(1.8);
+    expect(labelScale(0.05)).toBe(1.8);
   });
 });
