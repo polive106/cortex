@@ -1,7 +1,6 @@
 ---
 name: fix-ci
 description: Diagnose and fix GitHub Actions failures on cortex by reproducing them locally.
-disable-model-invocation: true
 ---
 
 ## Steps
