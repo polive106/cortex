@@ -25,6 +25,10 @@ export class InMemoryWikiStore implements WikiStore {
     return files?.get(path) ?? null;
   }
 
+  async head(): Promise<string> {
+    return this.commits.at(-1)?.ref ?? "memory-0";
+  }
+
   async listPages(): Promise<string[]> {
     return [...this.files.keys()].filter(isPagePath).sort();
   }

@@ -46,6 +46,7 @@ out/        HTML artifacts, optionally grouped by project
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
 | [E5](./epic-05-artifacts/README.md) | Artifacts | Done |
 | [E6](./epic-06-sessions/README.md) | Session history | Done |
+| [E7](./epic-07-brain-graph/README.md) | Brain graph | Done |
 
 ## Implementation order
 
@@ -85,6 +86,9 @@ out/        HTML artifacts, optionally grouped by project
 33. E4-US02: mentions and DMs
 34. E4-US03: approvals in Slack
 35. E4-US04: "save this thread" ingestion
+36. E7-US01: live brain graph screen (ADR-0015)
+37. E7-US02: agent trail on the brain graph
+38. E7-US03: follow the agent in the brain panel
 
 ## Later / ideas (not yet stories)
 

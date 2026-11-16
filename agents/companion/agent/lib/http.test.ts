@@ -11,4 +11,10 @@ describe("json and failure", () => {
     expect(refused.headers.get("cache-control")).toBe("no-store");
     await expect(refused.json()).resolves.toEqual({ ok: false, error: "No such thing" });
   });
+
+  it("let a route set its own headers", () => {
+    const tagged = json({}, 200, { etag: '"a"', "cache-control": "private, no-cache" });
+    expect(tagged.headers.get("etag")).toBe('"a"');
+    expect(tagged.headers.get("cache-control")).toBe("private, no-cache");
+  });
 });

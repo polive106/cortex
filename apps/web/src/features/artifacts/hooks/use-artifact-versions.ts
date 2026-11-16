@@ -1,5 +1,6 @@
 import type { EveMessage } from "eve/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { SidePanelState } from "@/lib/side-panel";
 import { type ArtifactVersion, artifactVersions } from "../api";
 
 export interface ArtifactVersionsState {
@@ -12,8 +13,14 @@ export interface ArtifactVersionsState {
   readonly hide: () => void;
 }
 
-/** The conversation's artifact versions, and which one the panel shows. A new version opens it. */
-export function useArtifactVersions(messages: readonly EveMessage[]): ArtifactVersionsState {
+/**
+ * The conversation's artifact versions, and which one the panel shows. A new version opens it.
+ * `onStateChange` hears where the panel stands, so the chat can lay other panels out around it.
+ */
+export function useArtifactVersions(
+  messages: readonly EveMessage[],
+  onStateChange?: (state: SidePanelState) => void,
+): ArtifactVersionsState {
   const versions = useMemo(() => artifactVersions(messages), [messages]);
   const latest = versions.at(-1)?.id;
   const [selectedId, setSelectedId] = useState<string>();
@@ -28,10 +35,14 @@ export function useArtifactVersions(messages: readonly EveMessage[]): ArtifactVe
     if (latest !== undefined) setOpen(true);
   }
 
+  const shown = open && versions.length > 0;
+  const state: SidePanelState = versions.length === 0 ? "none" : shown ? "open" : "closed";
+  useEffect(() => onStateChange?.(state), [onStateChange, state]);
+
   return {
     versions,
     selected: versions.find((v) => v.id === selectedId) ?? versions.at(-1),
-    open: open && versions.length > 0,
+    open: shown,
     select: setSelectedId,
     show: () => setOpen(true),
     hide: () => setOpen(false),

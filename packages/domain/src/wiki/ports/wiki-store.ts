@@ -17,6 +17,8 @@ export interface WikiStore {
    * content as of that commit; null when the ref is unknown.
    */
   readFile(path: string, ref?: string): Promise<string | null>;
+  /** The ref of the current head commit. It changes whenever a commit lands. */
+  head(): Promise<string>;
   /** Every page path under `wiki/` (`.md` files only), sorted. */
   listPages(): Promise<string[]>;
   /** Every artifact path under `out/` (`.html` files only), sorted (ADR-0012). */

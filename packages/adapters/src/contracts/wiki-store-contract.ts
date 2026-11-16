@@ -57,6 +57,16 @@ export function describeWikiStoreContract(name: string, makeStore: () => Promise
       ]);
     });
 
+    it("moves the head to each new commit", async () => {
+      const store = await makeStore();
+      const before = await store.head();
+      expect(before).toMatch(/\S/);
+      await expect(store.head()).resolves.toBe(before);
+      const { ref } = await store.commit(new Changeset().write("wiki/x.md", "x"), "x");
+      await expect(store.head()).resolves.toBe(ref);
+      expect(ref).not.toBe(before);
+    });
+
     it("commits a changeset so every write is readable, and returns a ref", async () => {
       const store = await makeStore();
       const result = await store.commit(

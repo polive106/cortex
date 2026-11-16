@@ -13,7 +13,7 @@ import {
 import { useEveAgent } from "eve/react";
 import { AlertCircleIcon, BrainIcon, PlusIcon, SquareIcon } from "lucide-react";
 import { useRef, useState } from "react";
-import { WEB_CHAT_AGENT } from "@/app/eve-agent";
+import { CHAT_AGENT } from "@/app/chat-agent";
 import {
   Conversation,
   ConversationContent,
@@ -32,15 +32,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { replaceSessionRoute } from "@/lib/session-route";
+import type { SidePanelState } from "@/lib/side-panel";
 import { cn } from "@/lib/utils";
 import { ArtifactPreview } from "@/src/features/artifacts";
+import { BrainTrailPreview } from "@/src/features/brain-graph";
 import { SessionHistory } from "@/src/features/sessions";
 import { AgentMessage } from "./agent-message";
 
 const DEFAULT_AGENT_NAME = "eve-agent";
-// E2E points the UI at the mockModel double. eve's installer rewrites eve-agent.ts, so the
-// override lives here.
-const CHAT_AGENT = process.env.NEXT_PUBLIC_WEB_CHAT_AGENT ?? WEB_CHAT_AGENT;
 const AGENT_NAME = CHAT_AGENT ?? DEFAULT_AGENT_NAME;
 
 export function AgentChat({
@@ -52,6 +51,7 @@ export function AgentChat({
 }) {
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
+  const [artifact, setArtifact] = useState<SidePanelState>("none");
   const hasSubmittedMessage = useRef(false);
   const syncSessionRoute = (nextSessionId: string) => {
     if (sessionId !== undefined) return;
@@ -245,7 +245,13 @@ export function AgentChat({
           <div className="w-full">{composer}</div>
         </div>
       </main>
-      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} />
+      <BrainTrailPreview
+        agent={AGENT_NAME}
+        artifact={artifact}
+        busy={isBusy || turnOpen}
+        messages={agent.messages}
+      />
+      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} onStateChange={setArtifact} />
     </div>
   );
 }

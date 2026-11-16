@@ -1,4 +1,4 @@
-import { PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon } from "lucide-react";
+import { NetworkIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, PlusIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,11 @@ export function SessionSidebar({
         {/* Room on the left for the account avatar, which sits fixed in the corner. */}
         <header className="flex h-14 shrink-0 items-center gap-1 pr-2 pl-14">
           <span className="flex-1 truncate font-medium text-sm">Sessions</span>
+          <Button asChild size="icon-sm" variant="ghost">
+            <a aria-label="Brain graph" data-testid="chat-link-brain" href="/brain">
+              <NetworkIcon />
+            </a>
+          </Button>
           <Button asChild size="icon-sm" variant="ghost">
             <a aria-label="New chat" data-testid="chat-link-sessions-new" href="/s">
               <PlusIcon />

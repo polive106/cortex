@@ -19,6 +19,7 @@ import {
   PublishArtifact,
   parseBrainRepo,
   ReadArtifact,
+  ReadBrainGraph,
   ReadIndex,
   ReadPage,
   RecordSessionActivity,
@@ -30,6 +31,7 @@ import {
   type WikiStore,
 } from "@cortex/domain";
 import { THEME_CSS } from "./lib/design-kit";
+import { SAMPLE_BRAIN } from "./lib/sample-brain";
 import { SAMPLE_SOURCES } from "./lib/sample-sources";
 import { STARTER_BRAIN } from "./lib/starter-brain";
 
@@ -39,6 +41,7 @@ export interface Container {
   readonly readPage: ReadPage;
   readonly searchWiki: SearchWiki;
   readonly readIndex: ReadIndex;
+  readonly readBrainGraph: ReadBrainGraph;
   readonly ingest: Ingest;
   readonly sourceFetcher: SourceFetcher;
   readonly fetchSource: FetchSource;
@@ -66,6 +69,7 @@ const systemClock: Clock = { now: () => new Date() };
  * and BRAIN_REPO ("owner/repo") set, the brain is the GitHub repo (ADR-0005). Otherwise it's an
  * in-memory brain seeded with the starter files, which lasts as long as the server process.
  * BRAIN_STORE=memory forces the in-memory brain, so flow evals and E2E never touch the real repo.
+ * BRAIN_SEED=sample seeds the in-memory brain with a linked example brain (brain graph demos).
  * Hosted builds without GitHub settings get a read-only brain: a write would vanish
  * with the server, so it's refused instead.
  *
@@ -92,6 +96,7 @@ export function createContainer(env: Env, overrides: ContainerOverrides = {}): C
     readPage: new ReadPage(wikiStore),
     searchWiki: new SearchWiki(wikiStore),
     readIndex: new ReadIndex(wikiStore),
+    readBrainGraph: new ReadBrainGraph(wikiStore, systemClock),
     ingest: new Ingest(wikiStore, systemClock),
     sourceFetcher,
     fetchSource: new FetchSource(sourceFetcher),
@@ -116,7 +121,8 @@ function sessionStore(env: Env): SessionIndex {
 }
 
 function brainStore(env: Env): WikiStore {
-  const starter = () => new InMemoryWikiStore({ ...STARTER_BRAIN });
+  const seed = env.BRAIN_SEED === "sample" ? SAMPLE_BRAIN : STARTER_BRAIN;
+  const starter = () => new InMemoryWikiStore({ ...seed });
   if (env.BRAIN_STORE === "memory") return starter();
   const { BRAIN_GITHUB_TOKEN: token, BRAIN_REPO: repo } = env;
   if (token && repo) {

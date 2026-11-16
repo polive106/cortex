@@ -45,6 +45,7 @@ describe("SessionSidebar", () => {
   it("links to a new chat", () => {
     renderSidebar();
     expect(screen.getByTestId("chat-link-sessions-new").getAttribute("href")).toBe("/s");
+    expect(screen.getByTestId("chat-link-brain").getAttribute("href")).toBe("/brain");
   });
 
   it("says when it's loading or empty", () => {
