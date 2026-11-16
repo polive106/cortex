@@ -13,8 +13,8 @@
 - [x] A `fetch_source` tool (read-only, no approval) returns the extracted text for the agent to save or summarize
 - [x] Pasted text ingests with origin `pasted`; a URL ingests with the URL as origin, kept in the raw file's frontmatter
 - [x] Saving a source whose raw name is taken (same title, same day) gets the next free number instead of failing
-- [x] When the person asks to keep a URL or pasted text, the agent saves it without approval (ADR-0011) and says what it saved and where; it never saves content nobody asked to keep
-- [x] Adapter tests use msw; fetcher coverage is at least 95%
+- [x] When the person asks to keep a URL or pasted text, the agent saves it without approval (ADR-0011) and says what it saved and where; it never saves content nobody asked to keep (an instruction rule in `instructions.md`; the real-model check is E3-US09's "does not save small talk")
+- [x] Adapter tests use msw (the pinned transport's own test uses a local loopback server, ADR-0014); fetcher coverage is at least 95%
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
