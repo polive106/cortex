@@ -1,4 +1,4 @@
-import { act, cleanup, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import type { PointerEvent, WheelEvent } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ForceLayout, Point } from "./use-force-layout";
@@ -121,5 +121,56 @@ describe("useGraphViewport", () => {
     const { result } = setup();
     act(() => result.current.svgRef(null));
     expect(result.current.size).toEqual({ width: 800, height: 600 });
+  });
+
+  it("eases to a point at a zoom, and a new glide replaces one in flight", async () => {
+    const { result } = setup();
+    act(() => result.current.glideTo({ x: 500, y: 500 }, 3));
+    act(() => result.current.glideTo({ x: 100, y: 50 }, 2));
+    await waitFor(() => expect(result.current.transform).toEqual({ x: -200, y: -100, k: 2 }));
+    expect(result.current.userMoved).toBe(false);
+  });
+
+  it("frames the graph again, at once or smoothly, and keeps framing it", async () => {
+    const layout = (points: Record<string, Point>): ForceLayout => ({
+      positions: new Map(Object.entries(points)),
+      pin: vi.fn(),
+      release: vi.fn(),
+    });
+    const small = layout({ a: { x: -100, y: -50 }, b: { x: 100, y: 50 } });
+    const { result, rerender } = renderHook(({ l }) => useGraphViewport(l), {
+      initialProps: { l: small },
+    });
+    act(() => result.current.svgRef(svg()));
+    act(() => result.current.centreOn({ x: 100, y: 50 }));
+    act(() => result.current.fit());
+    await waitFor(() => expect(result.current.transform.x).toBeCloseTo(0));
+    expect(result.current.transform.k).toBe(1);
+    rerender({ l: layout({ a: { x: -1000, y: 0 }, b: { x: 1000, y: 100 } }) });
+    expect(result.current.transform.k).toBeCloseTo(800 / 2160);
+    act(() => result.current.centreOn({ x: 0, y: 0 }));
+    act(() => result.current.fit());
+    await waitFor(() => expect(result.current.transform.k).toBeCloseTo(800 / 2160));
+  });
+
+  it("fits nothing before it's measured", () => {
+    const layout: ForceLayout = { positions: new Map(), pin: vi.fn(), release: vi.fn() };
+    const { result } = renderHook(() => useGraphViewport(layout));
+    act(() => result.current.fit());
+    expect(result.current.transform).toEqual({ x: 0, y: 0, k: 1 });
+  });
+
+  it("knows when the person moved the view, until reset; a pan stops a glide", async () => {
+    const { result, element } = setup();
+    act(() => result.current.glideTo({ x: 300, y: 300 }, 2));
+    act(() => result.current.onPointerDown(pointer(400, 300, element)));
+    act(() => result.current.onPointerMove(pointer(410, 300, element)));
+    act(() => result.current.onPointerUp(pointer(410, 300, element)));
+    expect(result.current.userMoved).toBe(true);
+    const held = result.current.transform;
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(result.current.transform).toEqual(held);
+    act(() => result.current.resetUserMoved());
+    expect(result.current.userMoved).toBe(false);
   });
 });

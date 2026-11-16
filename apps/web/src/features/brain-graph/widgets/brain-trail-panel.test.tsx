@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BrainFollowButton } from "./brain-follow-button";
 import { BrainOpenButton } from "./brain-open-button";
 import { BrainTrailPanel } from "./brain-trail-panel";
 
@@ -47,5 +48,20 @@ describe("BrainOpenButton", () => {
     cleanup();
     render(<BrainOpenButton onOpen={onOpen} shifted />);
     expect(screen.getByTestId("chat-btn-brain-open").className).toContain("right-[17rem]");
+  });
+});
+
+describe("BrainFollowButton", () => {
+  it("shows whether the view follows the agent, and toggles it", () => {
+    const onToggle = vi.fn();
+    render(<BrainFollowButton following onToggle={onToggle} />);
+    const button = screen.getByTestId("chat-btn-brain-follow");
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+    expect(button.textContent).toBe("Following");
+    fireEvent.click(button);
+    expect(onToggle).toHaveBeenCalled();
+    cleanup();
+    render(<BrainFollowButton following={false} onToggle={onToggle} />);
+    expect(screen.getByTestId("chat-btn-brain-follow").textContent).toBe("Follow");
   });
 });

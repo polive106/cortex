@@ -13,6 +13,16 @@ test.describe("brain trail", () => {
     ).toBeVisible();
     await expect(chat.page.getByTestId("chat-text-brain-steps")).toContainText("step");
 
+    // E7-US03: the panel follows the agent, until the person turns it off or moves the view.
+    const graph = chat.page.getByTestId("chat-graph-brain");
+    await expect(graph).toHaveAttribute("data-following", "true");
+    const follow = chat.page.getByTestId("chat-btn-brain-follow");
+    await follow.click();
+    await expect(follow).toHaveAttribute("aria-pressed", "false");
+    await expect(graph).toHaveAttribute("data-following", "false");
+    await follow.click();
+    await expect(graph).toHaveAttribute("data-following", "true");
+
     await chat.page.getByTestId("chat-btn-brain-close").click();
     await expect(panel).toBeHidden();
     await chat.page.getByTestId("chat-btn-brain-open").click();

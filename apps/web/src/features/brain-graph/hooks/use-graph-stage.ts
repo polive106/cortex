@@ -4,7 +4,7 @@ import type { GraphEdge, GraphNode } from "../api";
 import type { BrainGraphCanvasProps } from "../widgets/brain-graph-canvas";
 import { useForceLayout } from "./use-force-layout";
 import { type GraphFocus, useGraphFocus } from "./use-graph-focus";
-import { useGraphViewport } from "./use-graph-viewport";
+import { type GraphViewport, useGraphViewport } from "./use-graph-viewport";
 
 /** What the canvas needs from the stage; the view adds the graph data and the trail. */
 export type StageCanvasProps = Omit<
@@ -17,6 +17,8 @@ export interface GraphStage {
   readonly focus: GraphFocus;
   /** Centres the view on the search's best match. */
   readonly focusBestMatch: () => void;
+  /** Moves the view for the person (following the agent). */
+  readonly viewport: GraphViewport;
 }
 
 /**
@@ -77,5 +79,5 @@ export function useGraphStage(
     ],
   );
 
-  return { canvas, focus, focusBestMatch };
+  return { canvas, focus, focusBestMatch, viewport };
 }

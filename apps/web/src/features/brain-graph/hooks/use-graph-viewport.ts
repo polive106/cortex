@@ -19,7 +19,7 @@ export interface Transform {
 export interface GraphViewport {
   /** Attach to the <svg>: the viewport measures it. */
   readonly svgRef: RefCallback<SVGSVGElement>;
-  readonly size: { readonly width: number; readonly height: number };
+  readonly size: Size;
   readonly transform: Transform;
   /** The node being dragged. */
   readonly dragging: string | undefined;
@@ -31,6 +31,13 @@ export interface GraphViewport {
   readonly isClick: () => boolean;
   /** Centres the view on a point of the graph. */
   readonly centreOn: (point: Point) => void;
+  /** Eases the view to centre a point at zoom `k` (following the agent). */
+  readonly glideTo: (point: Point, k: number) => void;
+  /** Eases back to the whole graph, then keeps it framed as it grows. */
+  readonly fit: () => void;
+  /** The person has panned, zoomed or dragged since the last `resetUserMoved`. */
+  readonly userMoved: boolean;
+  readonly resetUserMoved: () => void;
 }
 
 const MIN_ZOOM = 0.2;
@@ -39,7 +46,39 @@ const FIT_PADDING = 80;
 /** Pointer travel (px) past which a press on a node is a drag, not a click. */
 const DRAG_SLOP = 4;
 
+const GLIDE_MS = 450;
+
 const clamp = (k: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, k));
+const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+type Size = { readonly width: number; readonly height: number };
+
+/** The transform that frames every node, zoomed in no further than 1. */
+function fitTransform(positions: ReadonlyMap<string, Point>, size: Size): Transform | undefined {
+  if (positions.size === 0 || size.width === 0 || size.height === 0) return undefined;
+  let [minX, maxX, minY, maxY] = [
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+    Number.POSITIVE_INFINITY,
+    Number.NEGATIVE_INFINITY,
+  ];
+  for (const { x, y } of positions.values()) {
+    [minX, maxX, minY, maxY] = [
+      Math.min(minX, x),
+      Math.max(maxX, x),
+      Math.min(minY, y),
+      Math.max(maxY, y),
+    ];
+  }
+  const k = clamp(
+    Math.min(
+      1,
+      size.width / (maxX - minX + FIT_PADDING * 2),
+      size.height / (maxY - minY + FIT_PADDING * 2),
+    ),
+  );
+  return { x: (-(minX + maxX) / 2) * k, y: (-(minY + maxY) / 2) * k, k };
+}
 
 type Gesture =
   | { kind: "pan"; from: Point; start: Transform }
@@ -47,19 +86,24 @@ type Gesture =
   | { kind: "pinch"; distance: number; start: Transform };
 
 /**
- * Pan, zoom (wheel or pinch) and node dragging for the graph. Until the user moves the view, it
- * keeps the whole graph in frame, so a live update that grows the graph stays visible.
+ * Pan, zoom (wheel or pinch) and node dragging for the graph. Until the view is moved (by the
+ * person, or a glide or centre), it keeps the whole graph in frame, so a live update that grows
+ * the graph stays visible.
  */
 export function useGraphViewport(layout: ForceLayout): GraphViewport {
   const { positions, pin, release } = layout;
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [size, setSize] = useState<Size>({ width: 0, height: 0 });
   const [transform, setTransform] = useState<Transform>({ x: 0, y: 0, k: 1 });
   const [dragging, setDragging] = useState<string>();
   const element = useRef<SVGSVGElement | null>(null);
   const observer = useRef<ResizeObserver | undefined>(undefined);
   const current = useRef(transform);
   current.current = transform;
-  const touched = useRef(false);
+  // Off while anything has moved the view: then the graph is no longer kept in frame.
+  const autoFit = useRef(true);
+  const [userMoved, setUserMoved] = useState(false);
+  const movedByHand = useRef(false);
+  const frame = useRef<number | undefined>(undefined);
   const pointers = useRef(new Map<number, Point>());
   const gesture = useRef<Gesture | undefined>(undefined);
   const lastDragMoved = useRef(false);
@@ -78,31 +122,85 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     observer.current.observe(svg);
   }, []);
 
+  const positionsNow = useRef(positions);
+  positionsNow.current = positions;
+  const sizeNow = useRef(size);
+  sizeNow.current = size;
+
+  const stopGlide = useCallback(() => {
+    if (frame.current !== undefined) cancelAnimationFrame(frame.current);
+    frame.current = undefined;
+  }, []);
+  useEffect(() => stopGlide, [stopGlide]);
+
+  /** Eases from the current transform to `to`, then runs `done`. */
+  const animate = useCallback(
+    (to: Transform, done?: () => void) => {
+      stopGlide();
+      const from = current.current;
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / GLIDE_MS);
+        const e = ease(t);
+        setTransform({
+          x: from.x + (to.x - from.x) * e,
+          y: from.y + (to.y - from.y) * e,
+          k: from.k + (to.k - from.k) * e,
+        });
+        if (t < 1) {
+          frame.current = requestAnimationFrame(step);
+        } else {
+          frame.current = undefined;
+          done?.();
+        }
+      };
+      frame.current = requestAnimationFrame(step);
+    },
+    [stopGlide],
+  );
+
+  /** Something other than auto-fit drives the view now: stop any glide and stop framing. */
+  const takeOver = useCallback(() => {
+    stopGlide();
+    autoFit.current = false;
+  }, [stopGlide]);
+
+  /** The person moved the view: take over, and say so (once, not on every pointer event). */
+  const moveByHand = useCallback(() => {
+    takeOver();
+    if (movedByHand.current) return;
+    movedByHand.current = true;
+    setUserMoved(true);
+  }, [takeOver]);
+
   useEffect(() => {
-    if (touched.current || positions.size === 0 || size.width === 0 || size.height === 0) return;
-    let [minX, maxX, minY, maxY] = [
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-    ];
-    for (const { x, y } of positions.values()) {
-      [minX, maxX, minY, maxY] = [
-        Math.min(minX, x),
-        Math.max(maxX, x),
-        Math.min(minY, y),
-        Math.max(maxY, y),
-      ];
-    }
-    const k = clamp(
-      Math.min(
-        1,
-        size.width / (maxX - minX + FIT_PADDING * 2),
-        size.height / (maxY - minY + FIT_PADDING * 2),
-      ),
-    );
-    setTransform({ x: (-(minX + maxX) / 2) * k, y: (-(minY + maxY) / 2) * k, k });
+    if (!autoFit.current || frame.current !== undefined) return;
+    const fitted = fitTransform(positions, size);
+    if (fitted) setTransform(fitted);
   }, [positions, size]);
+
+  const glideTo = useCallback(
+    (point: Point, k: number) => {
+      takeOver();
+      const zoom = clamp(k);
+      animate({ x: -point.x * zoom, y: -point.y * zoom, k: zoom });
+    },
+    [animate, takeOver],
+  );
+
+  const fit = useCallback(() => {
+    const fitted = fitTransform(positionsNow.current, sizeNow.current);
+    const resume = () => {
+      autoFit.current = true;
+    };
+    if (fitted) animate(fitted, resume);
+    else resume();
+  }, [animate]);
+
+  const resetUserMoved = useCallback(() => {
+    movedByHand.current = false;
+    setUserMoved(false);
+  }, []);
 
   /** A pointer's offset from the svg's centre, in screen pixels. */
   const offset = (clientX: number, clientY: number): Point => {
@@ -117,12 +215,15 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     y: (screen.y - t.y) / t.k,
   });
 
-  const zoomAround = useCallback((screen: Point, k: number, from: Transform) => {
-    const point = toGraph(screen, from);
-    const next = clamp(k);
-    touched.current = true;
-    setTransform({ x: screen.x - point.x * next, y: screen.y - point.y * next, k: next });
-  }, []);
+  const zoomAround = useCallback(
+    (screen: Point, k: number, from: Transform) => {
+      moveByHand();
+      const point = toGraph(screen, from);
+      const next = clamp(k);
+      setTransform({ x: screen.x - point.x * next, y: screen.y - point.y * next, k: next });
+    },
+    [moveByHand],
+  );
 
   const onWheel = useCallback(
     (event: WheelEvent<SVGSVGElement>) => {
@@ -163,7 +264,7 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
         const middle = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
         zoomAround(middle, active.start.k * (pinchDistance() / active.distance), active.start);
       } else if (active?.kind === "pan") {
-        touched.current = true;
+        moveByHand();
         setTransform({
           ...active.start,
           x: active.start.x + screen.x - active.from.x,
@@ -172,11 +273,12 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
       } else if (active?.kind === "node") {
         const travel = Math.hypot(screen.x - active.from.x, screen.y - active.from.y);
         if (!active.moved && travel < DRAG_SLOP) return;
+        if (!active.moved) moveByHand();
         active.moved = true;
         pin(active.id, toGraph(screen, current.current));
       }
     },
-    [pin, zoomAround],
+    [pin, zoomAround, moveByHand],
   );
 
   const onPointerUp = useCallback(
@@ -199,11 +301,14 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     return !moved;
   }, []);
 
-  const centreOn = useCallback((point: Point) => {
-    touched.current = true;
-    const { k } = current.current;
-    setTransform({ x: -point.x * k, y: -point.y * k, k });
-  }, []);
+  const centreOn = useCallback(
+    (point: Point) => {
+      takeOver();
+      const { k } = current.current;
+      setTransform({ x: -point.x * k, y: -point.y * k, k });
+    },
+    [takeOver],
+  );
 
   return {
     svgRef,
@@ -216,5 +321,9 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     onPointerUp,
     isClick,
     centreOn,
+    glideTo,
+    fit,
+    userMoved,
+    resetUserMoved,
   };
 }

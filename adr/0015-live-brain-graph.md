@@ -28,6 +28,7 @@ Three things were missing. Nothing parsed the links between pages. Page bodies u
   - A panel beside the chat draws the path as hops between pages, coloured by action.
   - It polls the graph only while open. Closed, it stays mounted so the layout survives.
   - After a write, it reloads until the graph reaches the commit `write_page` returned.
+  - During a turn it follows the agent, gliding to each new step's page, and eases back out to the whole brain when the turn ends (E7-US03).
 - `BRAIN_SEED=sample`, with `BRAIN_STORE=memory`, seeds a linked example brain for demos and screenshots.
 
 ## Consequences

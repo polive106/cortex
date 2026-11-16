@@ -245,7 +245,12 @@ export function AgentChat({
           <div className="w-full">{composer}</div>
         </div>
       </main>
-      <BrainTrailPreview agent={AGENT_NAME} artifact={artifact} messages={agent.messages} />
+      <BrainTrailPreview
+        agent={AGENT_NAME}
+        artifact={artifact}
+        busy={isBusy || turnOpen}
+        messages={agent.messages}
+      />
       <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} onStateChange={setArtifact} />
     </div>
   );

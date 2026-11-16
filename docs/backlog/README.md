@@ -88,6 +88,7 @@ out/        HTML artifacts, optionally grouped by project
 35. E4-US04: "save this thread" ingestion
 36. E7-US01: live brain graph screen (ADR-0015)
 37. E7-US02: agent trail on the brain graph
+38. E7-US03: follow the agent in the brain panel
 
 ## Later / ideas (not yet stories)
 

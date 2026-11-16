@@ -46,9 +46,12 @@ describe("BrainTrailPreview", () => {
   it("opens on the first step and marks the page the agent is reading", async () => {
     const fetch = vi.fn(async () => Response.json(graph));
     vi.stubGlobal("fetch", fetch);
-    render(<BrainTrailPreview agent="companion" messages={reading} pollMs={60_000} />);
+    render(<BrainTrailPreview agent="companion" busy messages={reading} pollMs={60_000} />);
     expect(screen.getByTestId("chat-panel-brain")).toBeTruthy();
     await waitFor(() => expect(screen.getByTestId("brain-node-welcome")).toBeTruthy());
+    expect(screen.getByTestId("chat-graph-brain").getAttribute("data-following")).toBe("true");
+    fireEvent.click(screen.getByTestId("chat-btn-brain-follow"));
+    expect(screen.getByTestId("chat-graph-brain").getAttribute("data-following")).toBe("false");
     expect(screen.getByTestId("brain-ring-latest")).toBeTruthy();
     expect(fetch).toHaveBeenCalledWith("/eve/companion/brain/graph", expect.anything());
 
