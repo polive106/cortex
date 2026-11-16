@@ -17,6 +17,7 @@ import {
   ListPages,
   ListSessions,
   PublishArtifact,
+  parseBrainRepo,
   ReadArtifact,
   ReadIndex,
   ReadPage,
@@ -119,9 +120,14 @@ function brainStore(env: Env): WikiStore {
   if (env.BRAIN_STORE === "memory") return starter();
   const { BRAIN_GITHUB_TOKEN: token, BRAIN_REPO: repo } = env;
   if (token && repo) {
-    const [owner, name, ...rest] = repo.split("/");
-    if (!owner || !name || rest.length > 0) throw new Error('BRAIN_REPO must be "owner/repo"');
-    return new GitHubWikiStore({ token, owner, repo: name, branch: env.BRAIN_BRANCH || "main" });
+    const brain = parseBrainRepo(repo, env.BRAIN_BRANCH);
+    if (!brain) throw new Error('BRAIN_REPO must be "owner/repo"');
+    return new GitHubWikiStore({
+      token,
+      owner: brain.owner,
+      repo: brain.name,
+      branch: brain.branch,
+    });
   }
   const hosted = env.VERCEL_ENV === "production" || env.VERCEL_ENV === "preview";
   return hosted

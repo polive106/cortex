@@ -80,10 +80,18 @@ describe("Ingest", () => {
     expect(store.files["log.md"]).toContain("## [2026-11-14] ingest | Deploy notes");
   });
 
-  it("refuses to overwrite an existing raw source (raw/ is immutable) without retrying", async () => {
-    const { store, ingest } = setup({ ...BRAIN, "raw/2026-11-14-deploy-notes.md": "already" });
-    await expect(ingest.execute(request())).rejects.toThrow(/immutable/);
-    expect(store.commits).toEqual([]);
+  it("never overwrites a raw source: a taken name gets the next free number", async () => {
+    const { store, ingest } = setup({
+      ...BRAIN,
+      "raw/2026-11-14-deploy-notes.md": "first",
+      "raw/2026-11-14-deploy-notes-2.md": "second",
+    });
+    const result = await ingest.execute(request());
+    expect(result.source).toBe("raw/2026-11-14-deploy-notes-3.md");
+    expect(store.files["raw/2026-11-14-deploy-notes.md"]).toBe("first");
+    expect(store.files["raw/2026-11-14-deploy-notes-2.md"]).toBe("second");
+    expect(store.files["raw/2026-11-14-deploy-notes-3.md"]).toContain("We deploy on push.");
+    expect(store.files["log.md"]).toContain("- source raw/2026-11-14-deploy-notes-3.md");
   });
 
   it("re-reads and re-plans once when the brain moves under the commit", async () => {

@@ -1,3 +1,4 @@
+export { type BrainRepo, parseBrainRepo } from "./entities/brain-repo";
 export { Changeset, type FileWrite } from "./entities/changeset";
 export { LogEntry, type LogEntryProps, type LogOperation } from "./entities/log-entry";
 export { Page, type PageProps } from "./entities/page";

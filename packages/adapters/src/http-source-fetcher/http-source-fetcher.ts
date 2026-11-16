@@ -7,6 +7,7 @@ import {
   SourceUrl,
 } from "@cortex/domain";
 import { htmlToMarkdown } from "./html-to-markdown";
+import { pinnedTransport, type Transport } from "./pinned-transport";
 
 export interface HttpSourceFetcherOptions {
   /** For the whole fetch, redirects included. Default 10s. */
@@ -19,6 +20,8 @@ export interface HttpSourceFetcherOptions {
   readonly maxRedirects?: number;
   /** Every address a host name resolves to. Defaults to the system resolver. */
   readonly resolve?: (host: string) => Promise<readonly string[]>;
+  /** Sends one GET to the checked addresses only. Defaults to `pinnedTransport`. */
+  readonly transport?: Transport;
 }
 
 const HTML_TYPES = new Set(["text/html", "application/xhtml+xml"]);
@@ -27,10 +30,9 @@ const REDIRECTS = new Set([301, 302, 303, 307, 308]);
 
 /**
  * Fetches a web page as Markdown for the brain (E3-US07). Each hop, redirects included, goes
- * through the domain's URL policy and then a DNS check: the request is made only when every
- * address the host resolves to is public. The resolver and fetch look the host up separately,
- * so a DNS answer that changes in between (rebinding) isn't covered; the tool is only open to
- * allowlisted people, and the deployment has no private network to reach.
+ * through the domain's URL policy, then resolves the host once and requires every address to be
+ * public. The transport connects only to those checked addresses, so a DNS answer that changes
+ * afterwards (rebinding) is never used.
  */
 export class HttpSourceFetcher implements SourceFetcher {
   private readonly timeoutMs: number;
@@ -38,6 +40,7 @@ export class HttpSourceFetcher implements SourceFetcher {
   private readonly maxChars: number;
   private readonly maxRedirects: number;
   private readonly resolve: (host: string) => Promise<readonly string[]>;
+  private readonly transport: Transport;
 
   constructor(options: HttpSourceFetcherOptions = {}) {
     this.timeoutMs = options.timeoutMs ?? 10_000;
@@ -45,6 +48,7 @@ export class HttpSourceFetcher implements SourceFetcher {
     this.maxChars = options.maxChars ?? 40_000;
     this.maxRedirects = options.maxRedirects ?? 5;
     this.resolve = options.resolve ?? systemResolve;
+    this.transport = options.transport ?? pinnedTransport;
   }
 
   async fetch(url: string): Promise<FetchedSource> {
@@ -65,12 +69,7 @@ export class HttpSourceFetcher implements SourceFetcher {
     let current = start;
     for (let redirects = 0; ; redirects++) {
       const url = SourceUrl.parse(current);
-      await this.checkHost(url);
-      const response = await fetch(url.value, {
-        redirect: "manual",
-        signal,
-        headers: { accept: "text/html, text/markdown;q=0.9, text/plain;q=0.8" },
-      });
+      const response = await this.transport(url.value, await this.checkedAddresses(url), signal);
       const location = response.headers.get("location");
       if (REDIRECTS.has(response.status) && location !== null) {
         if (redirects >= this.maxRedirects) {
@@ -86,12 +85,14 @@ export class HttpSourceFetcher implements SourceFetcher {
     }
   }
 
-  private async checkHost(url: SourceUrl): Promise<void> {
+  /** The host's addresses, every one of them public, or a fetch error. */
+  private async checkedAddresses(url: SourceUrl): Promise<readonly string[]> {
     const addresses = await this.resolve(url.address).catch(() => []);
     if (addresses.length === 0) {
       throw new SourceFetchError(url.value, `${url.host} couldn't be resolved`);
     }
     if (addresses.some(isBlockedAddress)) throw new BlockedAddressError(url.value, url.host);
+    return addresses;
   }
 
   private async read(url: string, response: Response): Promise<FetchedSource> {

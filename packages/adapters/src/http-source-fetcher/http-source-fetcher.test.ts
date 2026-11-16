@@ -4,6 +4,7 @@ import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { describeSourceFetcherContract } from "../contracts/source-fetcher-contract";
 import { HttpSourceFetcher, type HttpSourceFetcherOptions } from "./http-source-fetcher";
+import type { Transport } from "./pinned-transport";
 
 const server = setupServer();
 beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
@@ -12,8 +13,10 @@ afterAll(() => server.close());
 
 /** Public addresses for every host unless a test says otherwise; DNS is never real here. */
 const PUBLIC = async () => ["93.184.216.34"];
+/** Global fetch, which msw intercepts; pinned-transport.test.ts covers the real transport. */
+const viaFetch: Transport = (url, _addresses, signal) => fetch(url, { redirect: "manual", signal });
 const fetcher = (options: HttpSourceFetcherOptions = {}) =>
-  new HttpSourceFetcher({ resolve: PUBLIC, ...options });
+  new HttpSourceFetcher({ resolve: PUBLIC, transport: viaFetch, ...options });
 
 const html = (body: string, headers: Record<string, string> = {}) =>
   new HttpResponse(body, { headers: { "content-type": "text/html; charset=utf-8", ...headers } });
@@ -32,10 +35,9 @@ describeSourceFetcherContract("HttpSourceFetcher", async (pages) => {
 describe("HttpSourceFetcher", () => {
   it("extracts the title and readable text from HTML", async () => {
     server.use(
-      http.get("https://example.com/post", ({ request }) => {
-        expect(request.headers.get("accept")).toContain("text/html");
-        return html("<title>Post</title><article><h1>Post</h1><p>Hello.</p></article>");
-      }),
+      http.get("https://example.com/post", () =>
+        html("<title>Post</title><article><h1>Post</h1><p>Hello.</p></article>"),
+      ),
     );
     await expect(fetcher().fetch("https://example.com/post")).resolves.toEqual({
       title: "Post",
@@ -248,11 +250,21 @@ describe("HttpSourceFetcher", () => {
     ).rejects.toThrow("empty.example.com couldn't be resolved");
   });
 
+  it("hands the transport only the addresses it checked", async () => {
+    const transport = vi.fn(viaFetch);
+    server.use(http.get("https://example.com/pinned", () => HttpResponse.text("ok")));
+    await fetcher({ transport }).fetch("https://example.com/pinned");
+    expect(transport).toHaveBeenCalledWith(
+      "https://example.com/pinned",
+      ["93.184.216.34"],
+      expect.any(AbortSignal),
+    );
+  });
+
   it("resolves with the system DNS by default", async () => {
-    // "localhost" is refused by name before DNS; an IPv4 literal resolves to itself.
+    // An IPv4 literal resolves to itself, so this never needs a real DNS server.
     server.use(http.get("https://93.184.216.34/", () => HttpResponse.text("by ip")));
-    await expect(new HttpSourceFetcher().fetch("https://93.184.216.34/")).resolves.toMatchObject({
-      text: "by ip",
-    });
+    const byIp = new HttpSourceFetcher({ transport: viaFetch });
+    await expect(byIp.fetch("https://93.184.216.34/")).resolves.toMatchObject({ text: "by ip" });
   });
 });

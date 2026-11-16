@@ -5,13 +5,14 @@
 **Acceptance Criteria**:
 - [x] `SourceUrl` (domain) accepts http(s) URLs only, without credentials, and refuses `localhost` and literal private, loopback, link-local, and reserved addresses with a `BlockedAddressError` (SSRF)
 - [x] `HttpSourceFetcher` implements `SourceFetcher`:
-  - [x] resolves the host and refuses it when any address is blocked, again on every redirect hop
+  - [x] resolves the host and refuses it when any address is blocked, again on every redirect hop, and connects only to the checked addresses (no DNS rebinding)
   - [x] has a timeout and a size cap
   - [x] accepts HTML, plain text, and Markdown only
   - [x] extracts the title and readable text into Markdown
 - [x] `InMemorySourceFetcher` is its twin; `SOURCE_FETCHER=memory` selects it for evals and E2E, so they never reach the network
 - [x] A `fetch_source` tool (read-only, no approval) returns the extracted text for the agent to save or summarize
 - [x] Pasted text ingests with origin `pasted`; a URL ingests with the URL as origin, kept in the raw file's frontmatter
+- [x] Saving a source whose raw name is taken (same title, same day) gets the next free number instead of failing
 - [x] When the person asks to keep a URL or pasted text, the agent saves it without approval (ADR-0011) and says what it saved and where; it never saves content nobody asked to keep
 - [x] Adapter tests use msw; fetcher coverage is at least 95%
 

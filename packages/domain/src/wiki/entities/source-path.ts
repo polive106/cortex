@@ -17,7 +17,9 @@ export class SourcePath {
     return new SourcePath(input);
   }
 
-  static forTitle(date: Date, title: string): SourcePath {
-    return SourcePath.parse(`raw/${isoDate(date)}-${slugify(title)}.md`);
+  /** The `n`th source with this title on this day: the first has no number, then -2, -3… */
+  static forTitle(date: Date, title: string, n = 1): SourcePath {
+    const suffix = n > 1 ? `-${n}` : "";
+    return SourcePath.parse(`raw/${isoDate(date)}-${slugify(title)}${suffix}.md`);
   }
 }

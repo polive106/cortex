@@ -33,9 +33,6 @@ const writeArtifact = (slug: string, revision: string) => ({
   ],
 });
 
-/** Numbers each URL ingest, so the same page saved twice in one server gets its own raw file. */
-let urlIngests = 0;
-
 const note = (word: string, path?: string) => ({
   source: { title: `Note ${word}`, origin: "pasted", text: `About ${word}.` },
   pages: [{ path, title: `Note ${word}`, summary: `About ${word}`, body: `All about ${word}.\n` }],
@@ -71,7 +68,7 @@ function afterTool(
   if (name === "fetch_source") {
     const { url = "", title = "", text = "" } = result;
     const page = { title, summary: `From ${url}`, body: `${text}\n` };
-    const source = { title: `${title} ${++urlIngests}`, origin: url, text };
+    const source = { title, origin: url, text };
     return { toolCalls: [{ name: "write_page", input: { source, pages: [page] } }] };
   }
   if (name === "write_page") return `Saved: ${result.changes?.join(", ")}`;
