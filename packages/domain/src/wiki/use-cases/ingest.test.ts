@@ -94,6 +94,16 @@ describe("Ingest", () => {
     expect(store.files["log.md"]).toContain("- source raw/2026-11-14-deploy-notes-3.md");
   });
 
+  it("keeps looking past a full batch of taken numbers", async () => {
+    const taken = Object.fromEntries(
+      ["", "-2", "-3", "-4", "-5"].map((n) => [`raw/2026-11-14-deploy-notes${n}.md`, "x"]),
+    );
+    const { ingest } = setup({ ...BRAIN, ...taken });
+    await expect(ingest.execute(request())).resolves.toMatchObject({
+      source: "raw/2026-11-14-deploy-notes-6.md",
+    });
+  });
+
   it("re-reads and re-plans once when the brain moves under the commit", async () => {
     const { store, ingest } = setup();
     store.headMovesFor = 1;

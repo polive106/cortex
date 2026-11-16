@@ -110,15 +110,25 @@ export class Ingest {
     return { ref, source: source.path.value, changes: lines };
   }
 
-  /** The first raw/ name for this title and day not taken yet; whether the first is, is known. */
+  /**
+   * The first raw/ name for this title and day not taken yet; whether the first is, is known.
+   * Later numbers are checked a batch at a time, in parallel, so a repeat costs one round trip.
+   */
   private async freeSourcePath(now: Date, title: string, firstFree: boolean): Promise<SourcePath> {
-    for (let n = 1; ; n++) {
-      const path = SourcePath.forTitle(now, title, n);
-      const free = n === 1 ? firstFree : (await this.store.readFile(path.value)) === null;
-      if (free) return path;
+    if (firstFree) return SourcePath.forTitle(now, title);
+    for (let start = 2; ; start += SOURCE_PROBE_BATCH) {
+      const paths = Array.from({ length: SOURCE_PROBE_BATCH }, (_, i) =>
+        SourcePath.forTitle(now, title, start + i),
+      );
+      const found = await Promise.all(paths.map((path) => this.store.readFile(path.value)));
+      const free = found.indexOf(null);
+      if (free !== -1) return paths[free] as SourcePath;
     }
   }
 }
+
+/** How many numbered raw/ names one round trip checks. */
+const SOURCE_PROBE_BATCH = 4;
 
 function pageTargets(request: Pick<IngestRequest, "pages">) {
   if (request.pages.length === 0) throw new InvalidIngestError("An ingest needs at least one page");
