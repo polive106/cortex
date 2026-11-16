@@ -50,6 +50,7 @@ import {
 import { approvalDetails } from "@/lib/approval-summary";
 import { safeMarkdownUrl } from "@/lib/safe-markdown-url";
 import { cn } from "@/lib/utils";
+import { citationMarkdown } from "@/src/features/citations";
 
 export type AgentAnswer = {
   readonly optionId?: string;
@@ -123,7 +124,9 @@ function AgentMessagePart({ asks, part }: { readonly asks: Asks; readonly part: 
       return (
         <MessageResponse
           caret="block"
+          components={citationMarkdown.components}
           isAnimating={part.state === "streaming"}
+          rehypePlugins={citationMarkdown.rehypePlugins}
           urlTransform={safeMarkdownUrl}
         >
           {part.text}

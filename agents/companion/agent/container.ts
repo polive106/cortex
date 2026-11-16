@@ -1,6 +1,8 @@
 import {
   GitHubWikiStore,
+  HttpSourceFetcher,
   InMemorySessionIndex,
+  InMemorySourceFetcher,
   InMemoryWikiStore,
   ReadOnlyWikiStore,
   TailwindArtifactBuilder,
@@ -9,6 +11,7 @@ import {
 import {
   type ArtifactBuilder,
   type Clock,
+  FetchSource,
   Ingest,
   ListArtifacts,
   ListPages,
@@ -22,9 +25,11 @@ import {
   RenameSession,
   SearchWiki,
   type SessionIndex,
+  type SourceFetcher,
   type WikiStore,
 } from "@cortex/domain";
 import { THEME_CSS } from "./lib/design-kit";
+import { SAMPLE_SOURCES } from "./lib/sample-sources";
 import { STARTER_BRAIN } from "./lib/starter-brain";
 
 export interface Container {
@@ -34,6 +39,8 @@ export interface Container {
   readonly searchWiki: SearchWiki;
   readonly readIndex: ReadIndex;
   readonly ingest: Ingest;
+  readonly sourceFetcher: SourceFetcher;
+  readonly fetchSource: FetchSource;
   readonly publishArtifact: PublishArtifact;
   readonly readArtifact: ReadArtifact;
   readonly listArtifacts: ListArtifacts;
@@ -65,12 +72,19 @@ const systemClock: Clock = { now: () => new Date() };
  * UPSTASH_REDIS_REST_TOKEN set, or KV_REST_API_URL and KV_REST_API_TOKEN (the names the Vercel
  * Marketplace integration writes with the KV prefix). It's in memory otherwise, or with
  * SESSIONS_STORE=memory.
+ *
+ * Sources are fetched from the web (E3-US07). SOURCE_FETCHER=memory serves the sample pages
+ * instead, so flow evals and E2E never reach the network.
  */
 export function createContainer(env: Env, overrides: ContainerOverrides = {}): Container {
   const wikiStore = brainStore(env);
   // Artifacts compile on the design kit's theme, in-process (ADR-0012).
   const builder = overrides.builder ?? new TailwindArtifactBuilder(THEME_CSS);
   const sessionIndex = sessionStore(env);
+  const sourceFetcher =
+    env.SOURCE_FETCHER === "memory"
+      ? new InMemorySourceFetcher(SAMPLE_SOURCES)
+      : new HttpSourceFetcher();
   return {
     wikiStore,
     listPages: new ListPages(wikiStore),
@@ -78,6 +92,8 @@ export function createContainer(env: Env, overrides: ContainerOverrides = {}): C
     searchWiki: new SearchWiki(wikiStore),
     readIndex: new ReadIndex(wikiStore),
     ingest: new Ingest(wikiStore, systemClock),
+    sourceFetcher,
+    fetchSource: new FetchSource(sourceFetcher),
     publishArtifact: new PublishArtifact(wikiStore, builder, systemClock),
     readArtifact: new ReadArtifact(wikiStore),
     listArtifacts: new ListArtifacts(wikiStore),

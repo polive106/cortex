@@ -68,8 +68,8 @@ out/        HTML artifacts, optionally grouped by project
 16. E3-US04: in-memory and GitHub wiki store adapters
 17. E3-US05: wiki tools with approval on writes
 18. E3-US06: recall of AGENTS.md and index.md every turn
-19. E3-US07: URL fetching and pasted-text ingestion
-20. E5-US01: brain writes without approval (before URL ingestion, so it lands on the new rule)
+19. E5-US01: brain writes without approval (before URL ingestion, so it lands on the new rule)
+20. E3-US07: URL fetching and pasted-text ingestion
 21. E5-US02: artifact domain
 22. E5-US03: Tailwind artifact builder and artifact listing
 23. E5-US04: sandbox and shadcn design kit
