@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { GraphNode } from "../api";
+import type { GraphNode, TrailStep } from "../api";
 import { BrainGraphCanvas, type BrainGraphCanvasProps } from "./brain-graph-canvas";
 
 afterEach(cleanup);
@@ -46,7 +46,16 @@ function show(overrides: Partial<BrainGraphCanvasProps> = {}) {
   return { ...view, props };
 }
 
-const lines = (container: HTMLElement) => [...container.querySelectorAll("line")];
+/** The graph's edges, not the trail's hops. */
+const lines = (container: HTMLElement) => [
+  ...container.querySelectorAll("svg > g > g:first-child > line"),
+];
+const step = (path: string, action: TrailStep["action"] = "read", active = false) => ({
+  id: `call:${path}`,
+  path,
+  action,
+  active,
+});
 
 describe("BrainGraphCanvas", () => {
   it("draws the hub, each placed page labelled by file name, and edges between placed nodes", () => {
@@ -78,13 +87,48 @@ describe("BrainGraphCanvas", () => {
     expect(toB?.getAttribute("stroke")).toBe("#c8c8c8");
   });
 
-  it("marks the agent's trail and pulses its latest step", () => {
-    const { container } = show({
-      trail: [{ path: "wiki/a.md" }, { path: "wiki/people/b.md" }],
+  it("draws a hop per step in the step's colour, and pulses the latest page", () => {
+    show({
+      trail: [step("index.md", "search"), step("wiki/a.md"), step("wiki/people/b.md", "write")],
     });
-    expect(lines(container)[1]?.getAttribute("stroke")).toBe("#f0b45a");
-    expect(screen.getByTestId("brain-node-people-b").querySelector(".animate-pulse")).toBeTruthy();
-    expect(screen.getByTestId("brain-node-a").querySelector(".animate-pulse")).toBeNull();
+    const hops = screen.getAllByTestId("brain-line-hop");
+    expect(hops).toHaveLength(2);
+    expect(hops[0]?.querySelector("line")?.getAttribute("stroke")).toBe("#f0b45a");
+    expect(hops[1]?.querySelector("line")?.getAttribute("stroke")).toBe("#7ee0a1");
+    expect(hops[1]?.getAttribute("opacity")).toBe("1");
+    expect(Number(hops[0]?.getAttribute("opacity"))).toBeLessThan(1);
+    expect(hops[1]?.querySelector("animate")).toBeTruthy();
+    const ring = screen.getByTestId("brain-ring-latest");
+    expect(ring.closest("[data-node-id]")?.getAttribute("data-node-id")).toBe("wiki/people/b.md");
+    expect(ring.getAttribute("stroke")).toBe("#7ee0a1");
+    expect(ring.getAttribute("class")).not.toContain("animation-duration");
+    const a = screen.getByTestId("brain-node-a").querySelectorAll("circle");
+    expect(a[a.length - 1]?.getAttribute("stroke")).toBe("#f0b45a");
+  });
+
+  it("pulses faster while the latest call runs, and skips hops to unplaced pages", () => {
+    show({ trail: [step("wiki/gone.md"), step("wiki/a.md", "read", true)] });
+    expect(screen.queryAllByTestId("brain-line-hop")).toHaveLength(0);
+    expect(screen.getByTestId("brain-ring-latest").getAttribute("class")).toContain(
+      "animation-duration",
+    );
+  });
+
+  it("draws only the latest hops", () => {
+    const trail = Array.from({ length: 12 }, (_, i) =>
+      step(i % 2 ? "wiki/a.md" : "index.md", "read"),
+    ).map((s, i) => ({ ...s, id: `c${i}` }));
+    show({ trail });
+    expect(screen.getAllByTestId("brain-line-hop")).toHaveLength(8);
+  });
+
+  it("dims untouched pages when quiet, and only with a trail", () => {
+    show({ quiet: true, trail: [step("wiki/a.md")] });
+    expect(screen.getByTestId("brain-node-a").getAttribute("opacity")).toBe("1");
+    expect(screen.getByTestId("brain-node-people-b").getAttribute("opacity")).toBe("0.45");
+    cleanup();
+    show({ quiet: true });
+    expect(screen.getByTestId("brain-node-people-b").getAttribute("opacity")).toBe("1");
   });
 
   it("fades new nodes in", () => {

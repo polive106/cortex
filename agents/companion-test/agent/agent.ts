@@ -10,6 +10,7 @@ import { type MockModelRequest, type MockModelResponse, mockModel } from "eve/ev
 // - "read note <word>" calls read_page for wiki/note-<word>.md;
 // - "save url <url>" calls fetch_source, then write_page with the page under its URL (E3-US07);
 // - "cite welcome" reads wiki/welcome.md and answers citing it (E3-US08);
+// - "walk brain" searches the brain for "brain", then reads wiki/welcome.md (E7-US02);
 // - "what is indexed" reports the first index entry from recalled memory (E3-US06);
 // - "make artifact <slug>" / "revise artifact <slug>" write artifacts/<slug>/index.html with bash,
 //   then call publish_artifact (E5-US07);
@@ -72,6 +73,9 @@ function afterTool(
     return { toolCalls: [{ name: "write_page", input: { source, pages: [page] } }] };
   }
   if (name === "write_page") return `Saved: ${result.changes?.join(", ")}`;
+  if (name === "search_wiki") {
+    return { toolCalls: [{ name: "read_page", input: { path: "wiki/welcome.md" } }] };
+  }
   if (name === "read_page" && result.path === "wiki/welcome.md") {
     return `The brain is where the team keeps what it knows ([${result.title}](wiki/welcome.md)).`;
   }
@@ -112,6 +116,9 @@ function respond({ lastUserMessage, messages, toolResults }: MockModelRequest): 
     return {
       toolCalls: [{ name: "publish_artifact", input: { slug: "missing", title: "Missing" } }],
     };
+  }
+  if (message === "walk brain") {
+    return { toolCalls: [{ name: "search_wiki", input: { query: "brain" } }] };
   }
   if (message === "cite welcome") {
     return { toolCalls: [{ name: "read_page", input: { path: "wiki/welcome.md" } }] };

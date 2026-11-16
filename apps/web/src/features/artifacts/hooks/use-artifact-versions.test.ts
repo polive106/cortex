@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import type { EveMessage } from "eve/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useArtifactVersions } from "./use-artifact-versions";
 
 const publish = (callId: string, version: number) =>
@@ -58,5 +58,19 @@ describe("useArtifactVersions", () => {
     act(() => result.current.hide());
     act(() => result.current.show());
     expect(result.current.open).toBe(true);
+  });
+
+  it("reports whether the panel is absent, open, or closed", () => {
+    const onStateChange = vi.fn();
+    const none: EveMessage[] = [];
+    const { result, rerender } = renderHook(
+      ({ messages }) => useArtifactVersions(messages, onStateChange),
+      { initialProps: { messages: none } },
+    );
+    expect(onStateChange).toHaveBeenLastCalledWith("none");
+    rerender({ messages: [publish("c1", 1)] });
+    expect(onStateChange).toHaveBeenLastCalledWith("open");
+    act(() => result.current.hide());
+    expect(onStateChange).toHaveBeenLastCalledWith("closed");
   });
 });

@@ -46,7 +46,7 @@ out/        HTML artifacts, optionally grouped by project
 | [E4](./epic-04-slack/README.md) | Slack | Pending |
 | [E5](./epic-05-artifacts/README.md) | Artifacts | Done |
 | [E6](./epic-06-sessions/README.md) | Session history | Done |
-| [E7](./epic-07-brain-graph/README.md) | Brain graph | In Progress |
+| [E7](./epic-07-brain-graph/README.md) | Brain graph | Done |
 
 ## Implementation order
 

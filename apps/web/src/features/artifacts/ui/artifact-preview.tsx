@@ -1,6 +1,7 @@
 "use client";
 
 import type { EveMessage } from "eve/react";
+import type { SidePanelState } from "@/lib/side-panel";
 import { artifactUrl } from "../api";
 import { useArtifactHtml } from "../hooks/use-artifact-html";
 import { useArtifactVersions } from "../hooks/use-artifact-versions";
@@ -12,11 +13,16 @@ export interface ArtifactPreviewProps {
   readonly messages: readonly EveMessage[];
   /** The agent whose `/artifacts` route serves the pages. */
   readonly agent: string;
+  /** Hears whether the preview is absent, closed behind its button, or open. */
+  readonly onStateChange?: (state: SidePanelState) => void;
 }
 
 /** The artifact panel on the right of the chat, or a button to reopen it. Nothing until a publish. */
-export function ArtifactPreview({ messages, agent }: ArtifactPreviewProps) {
-  const { versions, selected, open, select, show, hide } = useArtifactVersions(messages);
+export function ArtifactPreview({ messages, agent, onStateChange }: ArtifactPreviewProps) {
+  const { versions, selected, open, select, show, hide } = useArtifactVersions(
+    messages,
+    onStateChange,
+  );
   const page = useArtifactHtml(open && selected ? artifactUrl(agent, selected) : undefined);
 
   if (!selected) return null;

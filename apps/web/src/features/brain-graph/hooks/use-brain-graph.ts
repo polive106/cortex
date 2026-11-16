@@ -10,14 +10,29 @@ export interface BrainGraphState {
   readonly error: string | undefined;
 }
 
+export interface BrainGraphOptions {
+  /** How often to look for new commits, in ms. */
+  readonly pollMs?: number;
+  /** A commit the graph should catch up to (the agent just wrote it): load until it arrives. */
+  readonly target?: string;
+  /** Hold off loading (a hidden panel); the last graph stays. */
+  readonly paused?: boolean;
+}
+
 export const POLL_MS = 5_000;
+/** While catching up to a target commit: how often, and how many times at most. */
+const CATCH_UP_MS = 500;
+const CATCH_UP_TRIES = 12;
 
 /**
- * The brain graph from the agent's `/brain/graph` route, kept live (E7-US01, ADR-0015): it polls
- * every `pollMs` while the tab is visible, and when it regains focus, sending the last ref as `If-None-Match`, so an
- * unchanged brain answers 304 and nothing re-renders.
+ * The brain graph from the agent's `/brain/graph` route, kept live (E7-US01, ADR-0015). It polls
+ * every `pollMs` while the tab is visible and on focus, sending the last ref as `If-None-Match`,
+ * so an unchanged brain answers 304 and nothing re-renders.
  */
-export function useBrainGraph(agent: string, pollMs = POLL_MS): BrainGraphState {
+export function useBrainGraph(
+  agent: string,
+  { pollMs = POLL_MS, target, paused = false }: BrainGraphOptions = {},
+): BrainGraphState {
   const [state, setState] = useState<BrainGraphState>({
     status: "loading",
     graph: undefined,
@@ -25,6 +40,9 @@ export function useBrainGraph(agent: string, pollMs = POLL_MS): BrainGraphState 
     error: undefined,
   });
   const ref = useRef<string | undefined>(undefined);
+  const reload = useRef<() => void>(() => {});
+  const pausedNow = useRef(paused);
+  pausedNow.current = paused;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -33,8 +51,8 @@ export function useBrainGraph(agent: string, pollMs = POLL_MS): BrainGraphState 
     const fail = (error: string) => setState((current) => ({ ...current, status: "error", error }));
 
     const load = async () => {
-      // A hidden tab waits: focus or becoming visible loads straight away.
-      if (inFlight || document.hidden) return;
+      // A hidden tab or panel waits: focus, becoming visible, or unpausing loads straight away.
+      if (inFlight || document.hidden || pausedNow.current) return;
       inFlight = true;
       try {
         const headers: HeadersInit = ref.current ? { "if-none-match": `"${ref.current}"` } : {};
@@ -73,18 +91,35 @@ export function useBrainGraph(agent: string, pollMs = POLL_MS): BrainGraphState 
       }
     };
 
+    reload.current = () => void load();
     void load();
     const timer = setInterval(load, pollMs);
-    const onFocus = () => void load();
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
+    window.addEventListener("focus", reload.current);
+    document.addEventListener("visibilitychange", reload.current);
     return () => {
       controller.abort();
       clearInterval(timer);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
+      window.removeEventListener("focus", reload.current);
+      document.removeEventListener("visibilitychange", reload.current);
     };
   }, [agent, pollMs]);
+
+  useEffect(() => {
+    if (!paused) reload.current();
+  }, [paused]);
+
+  useEffect(() => {
+    if (target === undefined) return;
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (ref.current === target || ++tries > CATCH_UP_TRIES) {
+        clearInterval(timer);
+        return;
+      }
+      reload.current();
+    }, CATCH_UP_MS);
+    return () => clearInterval(timer);
+  }, [target]);
 
   return state;
 }

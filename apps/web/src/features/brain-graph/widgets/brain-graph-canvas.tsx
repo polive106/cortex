@@ -1,7 +1,15 @@
-import type { PointerEvent, RefCallback, WheelEvent } from "react";
+import { memo, type PointerEvent, type RefCallback, type WheelEvent } from "react";
 import { pageName } from "@/lib/brain-location";
 import { cn } from "@/lib/utils";
-import { type GraphEdge, type GraphNode, nodeRadius, nodeSlug, type TrailStep } from "../api";
+import {
+  type GraphEdge,
+  type GraphNode,
+  nodeRadius,
+  nodeSlug,
+  TRAIL_COLORS,
+  type TrailAction,
+  type TrailStep,
+} from "../api";
 import type { Point } from "../hooks/use-force-layout";
 import type { Transform } from "../hooks/use-graph-viewport";
 
@@ -19,7 +27,9 @@ export interface BrainGraphCanvasProps {
   /** Nodes that just appeared, which fade in. */
   readonly fresh: ReadonlySet<string>;
   /** The agent's path through the brain, oldest first (E7-US02). */
-  readonly trail: readonly TrailStep[];
+  readonly trail?: readonly TrailStep[];
+  /** Dim pages the trail hasn't touched, so the path stands out (the chat's brain panel). */
+  readonly quiet?: boolean;
   readonly onHover: (id: string | undefined) => void;
   readonly onOpen: (id: string) => void;
   readonly onWheel: (event: WheelEvent<SVGSVGElement>) => void;
@@ -28,10 +38,15 @@ export interface BrainGraphCanvasProps {
   readonly onPointerUp: (event: PointerEvent<SVGSVGElement>) => void;
 }
 
-const TRAIL_COLOR = "#f0b45a";
+/** How many of the agent's latest hops are drawn; older ones have faded out. */
+const VISIBLE_HOPS = 8;
+const NO_TRAIL: readonly TrailStep[] = [];
 
-/** The brain drawn as a dark force graph (E7-US01): props only, positions come from a hook. */
-export function BrainGraphCanvas({
+/**
+ * The brain drawn as a dark force graph (E7-US01): props only, positions come from a hook.
+ * Memoised, so a streaming chat beside it doesn't redraw it unless its props change.
+ */
+export const BrainGraphCanvas = memo(function BrainGraphCanvas({
   nodes,
   edges,
   positions,
@@ -42,7 +57,8 @@ export function BrainGraphCanvas({
   hovered,
   dragging,
   fresh,
-  trail,
+  trail = NO_TRAIL,
+  quiet = false,
   onHover,
   onOpen,
   onWheel,
@@ -50,9 +66,13 @@ export function BrainGraphCanvas({
   onPointerMove,
   onPointerUp,
 }: BrainGraphCanvasProps) {
-  const trailed = new Set(trail.map((step) => step.path));
-  const latest = trail.at(-1)?.path;
+  // Each touched page keeps the colour of the last thing the agent did there.
+  const touched = new Map<string, TrailAction>(trail.map((step) => [step.path, step.action]));
+  const latest = trail.at(-1);
+  const recent = trail.slice(-(VISIBLE_HOPS + 1));
   const dim = (id: string) => highlighted !== undefined && !highlighted.has(id);
+  const nodeOpacity = (id: string) =>
+    dim(id) ? 0.18 : quiet && trail.length > 0 && !touched.has(id) ? 0.45 : 1;
   // Labels shrink slower than the graph, so they stay readable zoomed out (phones).
   const text = Math.min(1.8, Math.max(1, 1 / Math.sqrt(transform.k)));
   const origin = `translate(${size.width / 2 + transform.x} ${size.height / 2 + transform.y}) scale(${transform.k})`;
@@ -80,19 +100,44 @@ export function BrainGraphCanvas({
             const b = positions.get(target);
             if (!a || !b) return null;
             const lit = hovered !== undefined && (source === hovered || target === hovered);
-            const onTrail = trailed.has(source) && trailed.has(target);
             return (
               <line
                 className="transition-[stroke,stroke-opacity] duration-200"
                 key={`${source}|${target}`}
-                stroke={onTrail ? TRAIL_COLOR : lit ? "#c8c8c8" : "#5a5a5a"}
-                strokeOpacity={dim(source) || dim(target) ? 0.12 : lit || onTrail ? 0.95 : 0.75}
-                strokeWidth={lit || onTrail ? 1.6 : 1}
+                stroke={lit ? "#c8c8c8" : "#5a5a5a"}
+                strokeOpacity={dim(source) || dim(target) ? 0.12 : lit ? 0.95 : 0.75}
+                strokeWidth={lit ? 1.6 : 1}
                 x1={a.x}
                 x2={b.x}
                 y1={a.y}
                 y2={b.y}
               />
+            );
+          })}
+        </g>
+        <g data-testid="brain-layer-hops" fill="none" strokeLinecap="round">
+          {recent.slice(1).map((step, i) => {
+            const a = positions.get(recent[i]?.path ?? "");
+            const b = positions.get(step.path);
+            if (!a || !b) return null;
+            const age = recent.length - 2 - i;
+            const opacity = Math.max(0.15, 1 - age * 0.12);
+            const color = TRAIL_COLORS[step.action];
+            const line = { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+            return (
+              <g data-testid="brain-line-hop" key={step.id} opacity={opacity}>
+                <line {...line} stroke={color} strokeOpacity={0.25} strokeWidth={7} />
+                <line {...line} pathLength={1} stroke={color} strokeDasharray="1" strokeWidth={2}>
+                  {/* Each hop draws itself in once, when it first appears. */}
+                  <animate
+                    attributeName="stroke-dashoffset"
+                    dur="0.6s"
+                    fill="freeze"
+                    from="1"
+                    to="0"
+                  />
+                </line>
+              </g>
             );
           })}
         </g>
@@ -103,6 +148,7 @@ export function BrainGraphCanvas({
           const hub = node.kind === "index";
           const leaf = !hub && node.degree <= 1;
           const active = hovered === node.id;
+          const action = touched.get(node.id);
           return (
             <g
               aria-label={`${node.title}${node.summary ? ` — ${node.summary}` : ""}`}
@@ -116,7 +162,7 @@ export function BrainGraphCanvas({
               }}
               onPointerEnter={() => onHover(node.id)}
               onPointerLeave={() => onHover(undefined)}
-              opacity={dim(node.id) ? 0.18 : 1}
+              opacity={nodeOpacity(node.id)}
               role="button"
               tabIndex={0}
               transform={`translate(${point.x} ${point.y})`}
@@ -126,12 +172,13 @@ export function BrainGraphCanvas({
                 className={cn(fresh.has(node.id) && "fade-in zoom-in-50 animate-in duration-1000")}
                 style={{ transformBox: "fill-box", transformOrigin: "center" }}
               >
-                {latest === node.id ? (
+                {latest?.path === node.id ? (
                   <circle
-                    className="animate-pulse"
+                    className={cn("animate-pulse", latest.active && "[animation-duration:0.8s]")}
+                    data-testid="brain-ring-latest"
                     fill="none"
                     r={radius + 7}
-                    stroke={TRAIL_COLOR}
+                    stroke={TRAIL_COLORS[latest.action]}
                     strokeWidth={2}
                   />
                 ) : null}
@@ -147,8 +194,8 @@ export function BrainGraphCanvas({
                 <circle
                   fill={hub ? "#7a7a7a" : leaf ? "#4f4f4f" : "#6c6c6c"}
                   r={radius}
-                  stroke={trailed.has(node.id) ? TRAIL_COLOR : active ? "#e5e5e5" : "#2a2a2a"}
-                  strokeWidth={trailed.has(node.id) || active ? 2 : 1}
+                  stroke={action ? TRAIL_COLORS[action] : active ? "#e5e5e5" : "#2a2a2a"}
+                  strokeWidth={action || active ? 2 : 1}
                 />
               </g>
               {hub ? (
@@ -191,4 +238,4 @@ export function BrainGraphCanvas({
       </g>
     </svg>
   );
-}
+});

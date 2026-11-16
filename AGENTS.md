@@ -89,6 +89,7 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 
 - `/brain` draws the brain from `GET /eve/<agent>/brain/graph` (behind `WEB_AUTH`, mounted by `vercel.ts`). `BrainGraph` in the domain parses page links; don't parse them anywhere else.
 - The head commit (`WikiStore.head()`) is the ETag: the web polls every 5 s with `If-None-Match`, and `ReadBrainGraph` rebuilds only when the head moves.
+- The chat's brain panel draws the agent's path from its tool calls (`brainTrail(messages)`, E7-US02); it adds no server route and polls only while open.
 - `BRAIN_SEED=sample` (with the in-memory brain) seeds `agents/companion/agent/lib/sample-brain.ts`, a linked example brain for demos and screenshots.
 
 ## Frontend rules (ADR-0003)
@@ -149,7 +150,7 @@ pnpm sync:tailwind      # re-embed tailwindcss base CSS for artifacts after upgr
 
 ## Test agent
 
-`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels (chat, artifacts, sessions), session-index hook, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>", "save url <url>", "cite welcome"). Its sandbox is always just-bash: under `vercel dev` the default provider would pick Vercel Sandbox, which needs Vercel credentials E2E and CI don't have. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
+`agents/companion-test/` is a `mockModel` double of companion. It shares companion's channels (chat, artifacts, sessions), session-index hook, sandbox, and brain and artifact tools, and has a scripted `demo_action` tool behind `approval: always()`. Scripted messages are listed at the top of its `agent.ts` (for example "make artifact <slug>", "save url <url>", "cite welcome", "walk brain"). Its sandbox is always just-bash: under `vercel dev` the default provider would pick Vercel Sandbox, which needs Vercel credentials E2E and CI don't have. Flow evals and E2E run against it, so they cost no tokens. Under `vercel dev` it runs like any other agent, but `vercel.ts` leaves it out of hosted preview and production builds. To point the web UI at it, set `NEXT_PUBLIC_WEB_CHAT_AGENT=companion-test`. Keep the root `just-bash` dev dependency even though nothing imports it. Without it, `eve dev` installs a `package.json` into the agent directory, and eve's discovery then drops that agent.
 
 ## Environment variables
 

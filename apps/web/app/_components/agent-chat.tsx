@@ -32,8 +32,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { replaceSessionRoute } from "@/lib/session-route";
+import type { SidePanelState } from "@/lib/side-panel";
 import { cn } from "@/lib/utils";
 import { ArtifactPreview } from "@/src/features/artifacts";
+import { BrainTrailPreview } from "@/src/features/brain-graph";
 import { SessionHistory } from "@/src/features/sessions";
 import { AgentMessage } from "./agent-message";
 
@@ -49,6 +51,7 @@ export function AgentChat({
 }) {
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
+  const [artifact, setArtifact] = useState<SidePanelState>("none");
   const hasSubmittedMessage = useRef(false);
   const syncSessionRoute = (nextSessionId: string) => {
     if (sessionId !== undefined) return;
@@ -242,7 +245,8 @@ export function AgentChat({
           <div className="w-full">{composer}</div>
         </div>
       </main>
-      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} />
+      <BrainTrailPreview agent={AGENT_NAME} artifact={artifact} messages={agent.messages} />
+      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} onStateChange={setArtifact} />
     </div>
   );
 }

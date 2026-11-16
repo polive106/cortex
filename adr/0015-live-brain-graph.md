@@ -24,7 +24,10 @@ Three things were missing. Nothing parsed the links between pages. Page bodies u
   - On updates, existing nodes keep their places and new nodes start next to a neighbour.
 - **Screen**: the graph is its own route, `/brain`, linked from the session sidebar.
   - Interactions: pan, zoom (wheel or pinch), drag, hover to highlight neighbours, search, and click to open the page on GitHub.
-- **Trail prop**: the canvas takes a `trail` prop now, so E7-US02 can light up the pages companion reads and writes from the chat's tool calls.
+- **Agent trail (E7-US02)**: the chat derives the agent's path from its own tool calls (`read_page` inputs, `search_wiki` hits, `write_page` changes), with no new route.
+  - A panel beside the chat draws the path as hops between pages, coloured by action.
+  - It polls the graph only while open. Closed, it stays mounted so the layout survives.
+  - After a write, it reloads until the graph reaches the commit `write_page` returned.
 - `BRAIN_SEED=sample`, with `BRAIN_STORE=memory`, seeds a linked example brain for demos and screenshots.
 
 ## Consequences
