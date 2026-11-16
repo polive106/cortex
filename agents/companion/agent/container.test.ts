@@ -1,9 +1,62 @@
-import { GitHubWikiStore, InMemoryWikiStore, ReadOnlyWikiStore } from "@cortex/adapters";
+import {
+  GitHubWikiStore,
+  InMemorySessionIndex,
+  InMemoryWikiStore,
+  ReadOnlyWikiStore,
+  UpstashSessionIndex,
+} from "@cortex/adapters";
 import { afterEach, describe, expect, it } from "vitest";
 import { container, createContainer, useContainer } from "./container";
 import { DESIGN_KIT_FILES } from "./lib/design-kit";
 
 afterEach(() => useContainer(undefined));
+
+describe("createContainer session index (ADR-0013)", () => {
+  const upstash = {
+    UPSTASH_REDIS_REST_URL: "https://db.upstash.io",
+    UPSTASH_REDIS_REST_TOKEN: "t",
+  };
+
+  it("is in memory without Upstash settings", () => {
+    expect(createContainer({}).sessionIndex).toBeInstanceOf(InMemorySessionIndex);
+    const onlyUrl = { UPSTASH_REDIS_REST_URL: upstash.UPSTASH_REDIS_REST_URL };
+    expect(createContainer(onlyUrl).sessionIndex).toBeInstanceOf(InMemorySessionIndex);
+  });
+
+  it("uses Upstash when both the URL and the token are set", () => {
+    expect(createContainer(upstash).sessionIndex).toBeInstanceOf(UpstashSessionIndex);
+  });
+
+  it("also reads the Vercel Marketplace names, KV_REST_API_URL and KV_REST_API_TOKEN", () => {
+    const kv = { KV_REST_API_URL: "https://db.upstash.io", KV_REST_API_TOKEN: "t" };
+    expect(createContainer(kv).sessionIndex).toBeInstanceOf(UpstashSessionIndex);
+    const onlyKvUrl = { KV_REST_API_URL: kv.KV_REST_API_URL };
+    expect(createContainer(onlyKvUrl).sessionIndex).toBeInstanceOf(InMemorySessionIndex);
+    expect(createContainer({ ...kv, SESSIONS_STORE: "memory" }).sessionIndex).toBeInstanceOf(
+      InMemorySessionIndex,
+    );
+  });
+
+  it("SESSIONS_STORE=memory forces the in-memory index", () => {
+    const env = { ...upstash, SESSIONS_STORE: "memory" };
+    expect(createContainer(env).sessionIndex).toBeInstanceOf(InMemorySessionIndex);
+  });
+
+  it("wires the session use-cases to the same index", async () => {
+    const c = createContainer({});
+    await c.recordSessionActivity.execute({
+      owner: "u",
+      sessionId: "s",
+      message: "Hello",
+      at: new Date(),
+    });
+    await expect(c.listSessions.execute("u")).resolves.toMatchObject([{ title: "Hello" }]);
+    await c.renameSession.execute("u", "s", "Renamed");
+    await expect(c.sessionIndex.get("u", "s")).resolves.toMatchObject({ title: "Renamed" });
+    await c.removeSession.execute("u", "s", { end: async () => {} });
+    await expect(c.listSessions.execute("u")).resolves.toEqual([]);
+  });
+});
 
 describe("createContainer", () => {
   it("uses the in-memory brain, seeded with the starter files, without GitHub settings", async () => {

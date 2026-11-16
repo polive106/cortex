@@ -18,3 +18,4 @@ We use the [MADR](https://adr.github.io/madr/) format. **Read the relevant ADRs 
 | [0010](./0010-direct-anthropic-model-routing.md) | Direct Anthropic model routing on the owner's key | Accepted |
 | [0011](./0011-brain-writes-without-approval.md) | Brain writes without approval | Accepted |
 | [0012](./0012-html-artifacts.md) | HTML artifacts in the brain's out/ folder | Accepted |
+| [0013](./0013-session-index-upstash-redis.md) | Session index in Upstash Redis | Accepted |

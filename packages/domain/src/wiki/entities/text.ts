@@ -4,6 +4,9 @@ export const KEBAB = "[a-z0-9]+(?:-[a-z0-9]+)*";
 /** Collapses line breaks so a value fits on one line of frontmatter, index, or log. */
 export const oneLine = (value: string): string => value.replace(/\r?\n/g, " ");
 
+/** Collapses every run of whitespace to one space, trimmed: one tidy line of prose. */
+export const collapseWhitespace = (value: string): string => value.replace(/\s+/g, " ").trim();
+
 /** Lowercase kebab-case from free text: "Deploy Notes: v2!" → "deploy-notes-v2". */
 export const slugify = (value: string): string =>
   value

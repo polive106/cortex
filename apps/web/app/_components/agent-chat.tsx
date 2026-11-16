@@ -34,6 +34,7 @@ import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
 import { replaceSessionRoute } from "@/lib/session-route";
 import { cn } from "@/lib/utils";
 import { ArtifactPreview } from "@/src/features/artifacts";
+import { SessionHistory } from "@/src/features/sessions";
 import { AgentMessage } from "./agent-message";
 
 const DEFAULT_AGENT_NAME = "eve-agent";
@@ -172,6 +173,15 @@ export function AgentChat({
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
+      <SessionHistory
+        activeSessionId={activeSessionId}
+        agent={AGENT_NAME}
+        onActiveDeleted={() => window.location.assign("/s")}
+        // Reload once each turn settles: a new session is listed, and the open one moves up.
+        refreshKey={
+          agent.status === "idle" ? `${activeSessionId ?? ""}:${agent.messages.length}` : undefined
+        }
+      />
       <main className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         {showConversationLayout ? (
           <ChatHeader canStartNewChat={activeSessionId !== undefined} />

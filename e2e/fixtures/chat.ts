@@ -19,6 +19,11 @@ export class ChatPage {
     return this.page.frameLocator('[data-testid="chat-frame-artifact"]');
   }
 
+  /** The sidebar row for the session with this title (rows from other tests share the list). */
+  sessionRow(title: string): Locator {
+    return this.page.locator('[data-testid^="chat-row-session-"]').filter({ hasText: title });
+  }
+
   message(index: number): Locator {
     return this.page.getByTestId(`chat-row-message-${index}`);
   }

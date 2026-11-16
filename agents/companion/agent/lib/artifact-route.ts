@@ -4,15 +4,13 @@ import {
   InvalidPathError,
   type ReadArtifact,
 } from "@cortex/domain";
+import { failure } from "./http";
 
 export interface ArtifactRouteDeps {
   /** The caller's identity, or the Response that refuses them (eve's routeAuth). */
   readonly authenticate: (request: Request) => Promise<unknown>;
   readonly readArtifact: ReadArtifact;
 }
-
-const failure = (status: number, error: string) =>
-  Response.json({ ok: false, error }, { status, headers: { "cache-control": "no-store" } });
 
 /**
  * GET /artifacts?path=out/...html[&ref=<commit>]: one artifact version as HTML, for the web
