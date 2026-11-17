@@ -85,11 +85,12 @@ Hexagonal and lightweight. **Dependencies point inward: domain ← adapters ← 
 - The global hook `agents/companion/agent/hooks/session-index.ts` records web channel sessions on `delivery.consumed`. The title comes from the first message and is set only once, so a later turn never overwrites a rename. If recording fails, the error is logged and the chat isn't affected.
 - `/eve/<agent>/sessions` (behind `WEB_AUTH`, mounted by `vercel.ts`) serves `GET`, `PATCH ?id=` `{ title }`, and `DELETE ?id=`. Delete ends the eve session first, then removes the entry.
 
-## Brain graph rules (ADR-0015)
+## Brain graph rules (ADR-0015, ADR-0016)
 
 - `/brain` draws the brain from `GET /eve/<agent>/brain/graph` (behind `WEB_AUTH`, mounted by `vercel.ts`). `BrainGraph` in the domain parses page links; don't parse them anywhere else.
 - The head commit (`WikiStore.head()`) is the ETag: the web polls every 5 s with `If-None-Match`, and `ReadBrainGraph` rebuilds only when the head moves.
 - The chat's brain panel draws the agent's path from its tool calls (`brainTrail(messages)`, E7-US02); it adds no server route and polls only while open.
+- The reader under the graph (E7-US04, ADR-0016) reads `GET /eve/<agent>/brain/page?path=` (behind `WEB_AUTH`), which serves only `index.md` and `wiki/` pages. Page markdown keeps Streamdown's sanitizing and `safeMarkdownUrl`; links between pages resolve with the domain's `resolvePageLink`. Citations open pages in it through `apps/web/lib/brain-reader-context.tsx`.
 - `BRAIN_SEED=sample` (with the in-memory brain) seeds `agents/companion/agent/lib/sample-brain.ts`, a linked example brain for demos and screenshots.
 
 ## Frontend rules (ADR-0003)

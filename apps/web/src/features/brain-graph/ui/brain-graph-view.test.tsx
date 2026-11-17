@@ -22,23 +22,37 @@ const body = {
 };
 
 describe("BrainGraphView", () => {
-  it("draws the brain from the agent's route, opens a page on GitHub, and searches", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json(body)),
+  it("draws the brain from the agent's route, reads a page, and searches", async () => {
+    const fetch = vi.fn(async (url: string) =>
+      url.includes("/brain/page")
+        ? Response.json({
+            ok: true,
+            ref: "memory-0",
+            path: "wiki/pricing.md",
+            title: "Pricing",
+            summary: "",
+            updated: "2026-11-10",
+            body: "Tiers, see [churn](churn.md).",
+          })
+        : Response.json(body),
     );
-    const open = vi.fn();
-    vi.stubGlobal("open", open);
+    vi.stubGlobal("fetch", fetch);
     render(<BrainGraphView agent="companion" pollMs={60_000} />);
     await waitFor(() => expect(screen.getByTestId("brain-node-churn")).toBeTruthy());
     expect(screen.getByTestId("brain-text-count").textContent).toBe("2 pages · 2 links");
+    expect(screen.queryByTestId("brain-panel-reader")).toBeNull();
 
     fireEvent.click(screen.getByTestId("brain-node-pricing"));
-    expect(open).toHaveBeenCalledWith(
-      "https://github.com/polive106/brain/blob/main/wiki/pricing.md",
-      "_blank",
-      "noopener,noreferrer",
+    await waitFor(() =>
+      expect(screen.getByTestId("brain-text-reader-title").textContent).toBe("Pricing"),
     );
+    expect(fetch).toHaveBeenCalledWith(
+      "/eve/companion/brain/page?path=wiki%2Fpricing.md",
+      expect.anything(),
+    );
+    expect(screen.getByTestId("brain-btn-reader-page-churn")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("brain-btn-reader-close"));
+    expect(screen.queryByTestId("brain-panel-reader")).toBeNull();
 
     const search = screen.getByTestId("brain-input-search");
     fireEvent.change(search, { target: { value: "pric" } });

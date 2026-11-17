@@ -20,6 +20,7 @@ import {
   parseBrainRepo,
   ReadArtifact,
   ReadBrainGraph,
+  ReadBrainPage,
   ReadIndex,
   ReadPage,
   RecordSessionActivity,
@@ -42,6 +43,7 @@ export interface Container {
   readonly searchWiki: SearchWiki;
   readonly readIndex: ReadIndex;
   readonly readBrainGraph: ReadBrainGraph;
+  readonly readBrainPage: ReadBrainPage;
   readonly ingest: Ingest;
   readonly sourceFetcher: SourceFetcher;
   readonly fetchSource: FetchSource;
@@ -97,6 +99,7 @@ export function createContainer(env: Env, overrides: ContainerOverrides = {}): C
     searchWiki: new SearchWiki(wikiStore),
     readIndex: new ReadIndex(wikiStore),
     readBrainGraph: new ReadBrainGraph(wikiStore, systemClock),
+    readBrainPage: new ReadBrainPage(wikiStore),
     ingest: new Ingest(wikiStore, systemClock),
     sourceFetcher,
     fetchSource: new FetchSource(sourceFetcher),

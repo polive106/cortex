@@ -21,3 +21,4 @@ We use the [MADR](https://adr.github.io/madr/) format. **Read the relevant ADRs 
 | [0013](./0013-session-index-upstash-redis.md) | Session index in Upstash Redis | Accepted |
 | [0014](./0014-source-fetching-ssrf-guard.md) | Fetching web sources: public http(s) only, pinned to checked addresses | Accepted |
 | [0015](./0015-live-brain-graph.md) | Live brain graph with d3-force, polled by head commit | Accepted |
+| [0016](./0016-brain-page-reader.md) | Reading brain pages in the web app | Accepted |

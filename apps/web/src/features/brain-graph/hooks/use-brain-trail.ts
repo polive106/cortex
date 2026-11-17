@@ -1,5 +1,6 @@
 import type { EveMessage } from "eve/react";
 import { useMemo, useRef, useState } from "react";
+import type { PageRequest } from "@/lib/brain-reader-context";
 import { type BrainTrail, brainTrail } from "../api";
 
 export interface BrainTrailState extends BrainTrail {
@@ -14,10 +15,13 @@ const signature = ({ steps, written }: BrainTrail) =>
 /**
  * The agent's path through the brain in this conversation, and whether the brain panel shows it
  * (E7-US02). The panel opens by itself once the agent uses the brain, until the person closes or
- * opens it. The trail keeps its identity while tokens stream, so the graph only re-renders when
- * the agent actually moves.
+ * opens it, and whenever someone asks to read a page (`request`, E7-US04). The trail keeps its
+ * identity while tokens stream, so the graph only re-renders when the agent actually moves.
  */
-export function useBrainTrail(messages: readonly EveMessage[]): BrainTrailState {
+export function useBrainTrail(
+  messages: readonly EveMessage[],
+  request?: PageRequest,
+): BrainTrailState {
   const last = useRef<{ key: string; trail: BrainTrail } | undefined>(undefined);
   const trail = useMemo(() => {
     const next = brainTrail(messages);
@@ -27,6 +31,11 @@ export function useBrainTrail(messages: readonly EveMessage[]): BrainTrailState 
   }, [messages]);
   // Undefined until the person chooses: then the panel simply follows the agent's first step.
   const [choice, setChoice] = useState<boolean>();
+  const [seenRequest, setSeenRequest] = useState<PageRequest>();
+  if (request !== seenRequest) {
+    setSeenRequest(request);
+    if (request) setChoice(true);
+  }
 
   return {
     ...trail,

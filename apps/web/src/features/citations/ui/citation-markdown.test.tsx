@@ -1,6 +1,7 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Streamdown } from "streamdown";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { BrainReaderContext } from "@/lib/brain-reader-context";
 import { citationMarkdown } from "./citation-markdown";
 
 afterEach(cleanup);
@@ -33,5 +34,18 @@ describe("citationMarkdown", () => {
   it("leaves other links to Streamdown", () => {
     renderReply("See [AGENTS](AGENTS.md) and [site](https://example.com/).");
     expect(screen.queryByTestId(/chat-link-citation/)).toBeNull();
+  });
+
+  it("opens a citation in the brain reader when the chat provides one", () => {
+    const openPage = vi.fn();
+    render(
+      <BrainReaderContext.Provider value={openPage}>
+        <Streamdown mode="static" {...citationMarkdown}>
+          {"See [Deploys](wiki/deploys.md)."}
+        </Streamdown>
+      </BrainReaderContext.Provider>,
+    );
+    fireEvent.click(screen.getByTestId("chat-link-citation-deploys"));
+    expect(openPage).toHaveBeenCalledWith("wiki/deploys.md");
   });
 });

@@ -1,6 +1,14 @@
-import { type GraphEdge, type GraphNode, INDEX_NODE, PagePath } from "@cortex/domain";
+import {
+  type BrainPageView,
+  type GraphEdge,
+  type GraphNode,
+  INDEX_NODE,
+  PagePath,
+  resolvePageLink,
+} from "@cortex/domain";
 import type { EveMessage } from "eve/react";
 import { pageSlug } from "@/lib/brain-location";
+import { rehypeRetagLinks } from "@/lib/markdown-links";
 
 export { type GraphEdge, type GraphNode, INDEX_NODE };
 
@@ -147,3 +155,46 @@ export function neighbours(edges: readonly GraphEdge[]): ReadonlyMap<string, Rea
 /** A node's radius: the hub is largest; pages grow with their links. */
 export const nodeRadius = (node: Pick<GraphNode, "kind" | "degree">) =>
   node.kind === "index" ? 30 : 5 + Math.min(node.degree, 6) * 1.6;
+
+/** A brain page as `GET /brain/page` serves it, for the reader (E7-US04). */
+export type BrainPage = BrainPageView;
+
+/** The companion route behind the reader (agents/companion/agent/channels/brain.ts). */
+export const brainPageUrl = (agent: string, path: string) =>
+  `/eve/${agent}/brain/page?path=${encodeURIComponent(path)}`;
+
+const PAGE_FIELDS = ["ref", "path", "title", "summary", "updated", "body"] as const;
+
+/** The page in a `GET /brain/page` body, or undefined when it isn't one. */
+export function parseBrainPage(body: unknown): BrainPage | undefined {
+  const data = record(body);
+  if (!PAGE_FIELDS.every((key) => typeof data[key] === "string")) return undefined;
+  const { ref, path, title, summary, updated, body: text } = data as Record<string, string>;
+  return { ref, path, title, summary, updated, body: text } as BrainPage;
+}
+
+/** The page the reader follows: the one the agent last read or wrote (search hits aren't read). */
+export const readerTarget = (steps: readonly TrailStep[]): string | undefined =>
+  steps.findLast((step) => step.action !== "search")?.path;
+
+/**
+ * The brain page a link in the page `from` opens in the reader, or undefined when it goes
+ * elsewhere. The domain resolves it, as it does for the graph's edges.
+ */
+export function readerLink(from: string, href: string): string | undefined {
+  const target = resolvePageLink(from, href);
+  return target !== undefined && isReaderPage(target) ? target : undefined;
+}
+
+/** A repo path the reader can open: index.md or a valid page path. */
+const isReaderPage = (path: string) => path === INDEX_NODE || PagePath.tryParse(path) !== undefined;
+
+/** The element a page link becomes in the page's tree, rendered as a button in the reader. */
+export const READER_LINK_TAG = "brain-page-link";
+
+/**
+ * A rehype plugin for the page `from`: links to other brain pages become reader links. Other
+ * links keep the reply's URL policy.
+ */
+export const rehypeReaderLinks = (from: string) =>
+  rehypeRetagLinks(READER_LINK_TAG, (href) => readerLink(from, href));

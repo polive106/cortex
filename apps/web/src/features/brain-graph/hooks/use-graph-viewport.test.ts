@@ -85,7 +85,7 @@ describe("useGraphViewport", () => {
     expect(result.current.transform).toMatchObject({ x: 50, y: -20 });
   });
 
-  it("drags a node, and the click that ends a drag doesn't count", () => {
+  it("drags a node", () => {
     const { result, layout } = setup();
     const target = nodeTarget("b");
     act(() => result.current.onPointerDown(pointer(500, 350, target)));
@@ -97,8 +97,17 @@ describe("useGraphViewport", () => {
     act(() => result.current.onPointerUp(pointer(520, 360, target)));
     expect(layout.release).toHaveBeenCalledWith("b");
     expect(result.current.dragging).toBeUndefined();
-    expect(result.current.isClick()).toBe(false);
-    expect(result.current.isClick()).toBe(true);
+  });
+
+  it("captures the pointer on a node only once it's dragged, so a plain click reaches the node", () => {
+    const { result } = setup();
+    const target = nodeTarget("b");
+    const down = pointer(500, 350, target);
+    act(() => result.current.onPointerDown(down));
+    expect(down.currentTarget.setPointerCapture).not.toHaveBeenCalled();
+    const move = pointer(520, 360, target);
+    act(() => result.current.onPointerMove(move));
+    expect(move.currentTarget.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
   it("pinches to zoom", () => {

@@ -27,8 +27,6 @@ export interface GraphViewport {
   readonly onPointerDown: (event: PointerEvent<SVGSVGElement>) => void;
   readonly onPointerMove: (event: PointerEvent<SVGSVGElement>) => void;
   readonly onPointerUp: (event: PointerEvent<SVGSVGElement>) => void;
-  /** False for the click that ends a drag, so dragging a node doesn't open it. */
-  readonly isClick: () => boolean;
   /** Centres the view on a point of the graph. */
   readonly centreOn: (point: Point) => void;
   /** Eases the view to centre a point at zoom `k` (following the agent). */
@@ -106,7 +104,6 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
   const frame = useRef<number | undefined>(undefined);
   const pointers = useRef(new Map<number, Point>());
   const gesture = useRef<Gesture | undefined>(undefined);
-  const lastDragMoved = useRef(false);
 
   const svgRef = useCallback((svg: SVGSVGElement | null) => {
     observer.current?.disconnect();
@@ -239,10 +236,10 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
   };
 
   const onPointerDown = useCallback((event: PointerEvent<SVGSVGElement>) => {
-    event.currentTarget.setPointerCapture?.(event.pointerId);
     const screen = offset(event.clientX, event.clientY);
     pointers.current.set(event.pointerId, screen);
     if (pointers.current.size === 2) {
+      for (const id of pointers.current.keys()) event.currentTarget.setPointerCapture?.(id);
       gesture.current = { kind: "pinch", distance: pinchDistance(), start: current.current };
       return;
     }
@@ -250,7 +247,10 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     gesture.current = id
       ? { kind: "node", id, from: screen, moved: false }
       : { kind: "pan", from: screen, start: current.current };
+    // A node captures the pointer only once it's dragged. Captured, the browser sends the click to
+    // the svg: so a plain click reaches the node, and the click that ends a drag doesn't.
     if (id) setDragging(id);
+    else event.currentTarget.setPointerCapture?.(event.pointerId);
   }, []);
 
   const onPointerMove = useCallback(
@@ -273,7 +273,10 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
       } else if (active?.kind === "node") {
         const travel = Math.hypot(screen.x - active.from.x, screen.y - active.from.y);
         if (!active.moved && travel < DRAG_SLOP) return;
-        if (!active.moved) moveByHand();
+        if (!active.moved) {
+          event.currentTarget.setPointerCapture?.(event.pointerId);
+          moveByHand();
+        }
         active.moved = true;
         pin(active.id, toGraph(screen, current.current));
       }
@@ -287,19 +290,12 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
       const active = gesture.current;
       if (active?.kind === "node") {
         release(active.id);
-        lastDragMoved.current = active.moved;
         setDragging(undefined);
       }
       gesture.current = undefined;
     },
     [release],
   );
-
-  const isClick = useCallback(() => {
-    const moved = lastDragMoved.current;
-    lastDragMoved.current = false;
-    return !moved;
-  }, []);
 
   const centreOn = useCallback(
     (point: Point) => {
@@ -319,7 +315,6 @@ export function useGraphViewport(layout: ForceLayout): GraphViewport {
     onPointerDown,
     onPointerMove,
     onPointerUp,
-    isClick,
     centreOn,
     glideTo,
     fit,

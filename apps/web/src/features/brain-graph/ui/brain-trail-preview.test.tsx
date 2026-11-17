@@ -74,4 +74,60 @@ describe("BrainTrailPreview", () => {
     expect(screen.getByTestId("chat-panel-brain").getAttribute("data-hidden")).toBe("true");
     expect(screen.getByTestId("chat-btn-brain-open").className).toContain("right-36");
   });
+
+  it("reads the page the agent is on, and the node the person clicks", async () => {
+    const fetch = vi.fn(async (url: string) => {
+      if (!url.includes("/brain/page")) return Response.json(graph);
+      const path = new URL(url, "http://x").searchParams.get("path") ?? "";
+      return Response.json({ ...page, path, title: path === "index.md" ? "Index" : "Welcome" });
+    });
+    vi.stubGlobal("fetch", fetch);
+    render(<BrainTrailPreview agent="companion" busy messages={reading} pollMs={60_000} />);
+    await waitFor(() =>
+      expect(screen.getByTestId("chat-text-reader-title").textContent).toBe("Welcome"),
+    );
+    await waitFor(() => expect(screen.getByTestId("brain-node-index")).toBeTruthy());
+    fireEvent.click(screen.getByTestId("brain-node-index"));
+    await waitFor(() =>
+      expect(screen.getByTestId("chat-text-reader-title").textContent).toBe("Index"),
+    );
+    fireEvent.click(screen.getByTestId("chat-btn-reader-back"));
+    await waitFor(() =>
+      expect(screen.getByTestId("chat-text-reader-title").textContent).toBe("Welcome"),
+    );
+  });
+
+  it("opens on a page asked for from the chat, before the agent used the brain", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        url.includes("/brain/page") ? Response.json(page) : Response.json(graph),
+      ),
+    );
+    render(
+      <BrainTrailPreview
+        agent="companion"
+        messages={[]}
+        page={{ path: "wiki/welcome.md", id: 1 }}
+        pollMs={60_000}
+      />,
+    );
+    expect(screen.getByTestId("chat-panel-brain").getAttribute("data-hidden")).toBe("false");
+    expect(screen.getByTestId("chat-text-brain-steps").textContent).toBe(
+      "0 steps this conversation",
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("chat-text-reader-title").textContent).toBe("Welcome"),
+    );
+  });
 });
+
+const page = {
+  ok: true,
+  ref: "memory-0",
+  path: "wiki/welcome.md",
+  title: "Welcome",
+  summary: "",
+  updated: "",
+  body: "Hello",
+};

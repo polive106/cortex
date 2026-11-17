@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BrainGraph, INDEX_NODE } from "./brain-graph";
+import { BrainGraph, INDEX_NODE, resolvePageLink } from "./brain-graph";
 
 const page = (title: string, body = "") =>
   `---\ntitle: ${title}\nsummary: About ${title}\n---\n\n${body}`;
@@ -77,5 +77,24 @@ describe("BrainGraph.build", () => {
   it("counts a single article", () => {
     const graph = BrainGraph.build(null, [{ path: "wiki/a.md", content: "" }]);
     expect(graph.nodes[0]?.summary).toBe("1 article");
+  });
+});
+
+describe("resolvePageLink", () => {
+  it("resolves relative links from the linking page", () => {
+    expect(resolvePageLink("wiki/team/on-call.md", "deploys.md")).toBe("wiki/team/deploys.md");
+    expect(resolvePageLink("wiki/team/on-call.md", "../deploys.md#steps")).toBe("wiki/deploys.md");
+    expect(resolvePageLink("wiki/a.md", "./b.md?x=1")).toBe("wiki/b.md");
+  });
+
+  it("reads wiki/ and /wiki/ links from the repo root", () => {
+    expect(resolvePageLink("wiki/team/on-call.md", "wiki/deploys.md")).toBe("wiki/deploys.md");
+    expect(resolvePageLink("index.md", "/wiki/deploys.md")).toBe("wiki/deploys.md");
+  });
+
+  it("leaves links that go elsewhere", () => {
+    expect(resolvePageLink("wiki/a.md", "https://example.com/a.md")).toBeUndefined();
+    expect(resolvePageLink("wiki/a.md", "#top")).toBeUndefined();
+    expect(resolvePageLink("wiki/a.md", "../../x.md")).toBeUndefined();
   });
 });
