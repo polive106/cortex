@@ -89,6 +89,7 @@ out/        HTML artifacts, optionally grouped by project
 36. E7-US01: live brain graph screen (ADR-0015)
 37. E7-US02: agent trail on the brain graph
 38. E7-US03: follow the agent in the brain panel
+39. E7-US04: read brain pages beside the graph (ADR-0016)
 
 ## Later / ideas (not yet stories)
 

@@ -12,7 +12,7 @@ import {
 } from "eve/events";
 import { useEveAgent } from "eve/react";
 import { AlertCircleIcon, BrainIcon, PlusIcon, SquareIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { CHAT_AGENT } from "@/app/chat-agent";
 import {
   Conversation,
@@ -31,6 +31,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Button } from "@/components/ui/button";
 import { Trace, TraceIcon, TraceLine, TraceTitle } from "@/components/ui/trace";
+import { BrainReaderContext, type PageRequest } from "@/lib/brain-reader-context";
 import { replaceSessionRoute } from "@/lib/session-route";
 import type { SidePanelState } from "@/lib/side-panel";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,12 @@ export function AgentChat({
   const [cancellationError, setCancellationError] = useState<string>();
   const [hasInputText, setHasInputText] = useState(false);
   const [artifact, setArtifact] = useState<SidePanelState>("none");
+  // A citation clicked in a reply: the brain panel opens on that page (E7-US04).
+  const [pageRequest, setPageRequest] = useState<PageRequest>();
+  const openBrainPage = useCallback(
+    (path: string) => setPageRequest((last) => ({ path, id: (last?.id ?? 0) + 1 })),
+    [],
+  );
   const hasSubmittedMessage = useRef(false);
   const syncSessionRoute = (nextSessionId: string) => {
     if (sessionId !== undefined) return;
@@ -199,32 +206,34 @@ export function AgentChat({
             }
           >
             <ConversationTopFade className="top-14" />
-            <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
-              {agent.messages.map((message, index) =>
-                showPendingThinking &&
-                isPendingAssistantShell &&
-                message.id === lastMessage.id ? null : (
-                  <AgentMessage
-                    testId={`chat-row-message-${index}`}
-                    canRespond={canRespond}
-                    key={message.id}
-                    message={message}
-                    questionsFor={questionsFor}
-                    view={agent.view}
-                    onAnswers={async (answers) => {
-                      setCancellationError(undefined);
-                      await agent.respond(answers).catch((cause: unknown) => {
-                        setCancellationError(
-                          cause instanceof Error ? cause.message : "Unable to submit the answer.",
-                        );
-                      });
-                    }}
-                  />
-                ),
-              )}
-              {showPendingThinking ? <PendingActivity activity={now} /> : null}
-              {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
-            </ConversationContent>
+            <BrainReaderContext.Provider value={openBrainPage}>
+              <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
+                {agent.messages.map((message, index) =>
+                  showPendingThinking &&
+                  isPendingAssistantShell &&
+                  message.id === lastMessage.id ? null : (
+                    <AgentMessage
+                      testId={`chat-row-message-${index}`}
+                      canRespond={canRespond}
+                      key={message.id}
+                      message={message}
+                      questionsFor={questionsFor}
+                      view={agent.view}
+                      onAnswers={async (answers) => {
+                        setCancellationError(undefined);
+                        await agent.respond(answers).catch((cause: unknown) => {
+                          setCancellationError(
+                            cause instanceof Error ? cause.message : "Unable to submit the answer.",
+                          );
+                        });
+                      }}
+                    />
+                  ),
+                )}
+                {showPendingThinking ? <PendingActivity activity={now} /> : null}
+                {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
+              </ConversationContent>
+            </BrainReaderContext.Provider>
             <ConversationScrollButton />
           </Conversation>
         ) : null}
@@ -250,8 +259,14 @@ export function AgentChat({
         artifact={artifact}
         busy={isBusy || turnOpen}
         messages={agent.messages}
+        page={pageRequest}
       />
-      <ArtifactPreview agent={AGENT_NAME} messages={agent.messages} onStateChange={setArtifact} />
+      <ArtifactPreview
+        agent={AGENT_NAME}
+        messages={agent.messages}
+        onStateChange={setArtifact}
+        yieldTo={pageRequest}
+      />
     </div>
   );
 }

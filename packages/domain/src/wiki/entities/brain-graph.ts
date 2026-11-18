@@ -61,7 +61,7 @@ export class BrainGraph {
     });
     for (const { id, body } of pages) {
       for (const [, href = ""] of body.matchAll(LINK)) {
-        const target = resolve(id, href);
+        const target = resolvePageLink(id, href);
         if (target) connect(id, target);
       }
     }
@@ -87,8 +87,12 @@ export class BrainGraph {
   }
 }
 
-/** The repo path a link from `from` points at, or undefined when it leaves the repo. */
-function resolve(from: string, href: string): string | undefined {
+/**
+ * The repo path a markdown link in the file `from` points at, or undefined when it leaves the repo
+ * (a scheme, a bare anchor, too many `..`). Relative links resolve from `from`; `wiki/...` and
+ * `/wiki/...` from the repo root. The graph and the web reader both use it (E7-US04).
+ */
+export function resolvePageLink(from: string, href: string): string | undefined {
   if (SCHEME.test(href)) return undefined;
   const target = href.replace(/[#?].*$/, "");
   if (target === "") return undefined;

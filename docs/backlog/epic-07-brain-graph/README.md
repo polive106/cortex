@@ -7,3 +7,4 @@ A live map of the brain in the web UI: every page as a node, the index as a hub,
 | E7-US01 | Live brain graph screen | L | Done |
 | E7-US02 | Agent trail on the brain graph | M | Done |
 | E7-US03 | Follow the agent in the brain panel | S | Done |
+| E7-US04 | Read brain pages beside the graph | M | Done |

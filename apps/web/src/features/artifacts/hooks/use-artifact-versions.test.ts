@@ -73,4 +73,18 @@ describe("useArtifactVersions", () => {
     act(() => result.current.hide());
     expect(onStateChange).toHaveBeenLastCalledWith("closed");
   });
+
+  it("closes for each request to show another panel", () => {
+    const messages = [publish("c1", 1)];
+    const { result, rerender } = renderHook(
+      ({ yieldTo }: { yieldTo?: object }) => useArtifactVersions(messages, undefined, yieldTo),
+      { initialProps: {} as { yieldTo?: object } },
+    );
+    expect(result.current.open).toBe(true);
+    rerender({ yieldTo: { id: 1 } });
+    expect(result.current.open).toBe(false);
+    act(() => result.current.show());
+    rerender({ yieldTo: { id: 2 } });
+    expect(result.current.open).toBe(false);
+  });
 });

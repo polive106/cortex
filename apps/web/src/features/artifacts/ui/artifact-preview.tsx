@@ -15,13 +15,16 @@ export interface ArtifactPreviewProps {
   readonly agent: string;
   /** Hears whether the preview is absent, closed behind its button, or open. */
   readonly onStateChange?: (state: SidePanelState) => void;
+  /** Each new value closes the preview behind its button, making way for another panel. */
+  readonly yieldTo?: unknown;
 }
 
 /** The artifact panel on the right of the chat, or a button to reopen it. Nothing until a publish. */
-export function ArtifactPreview({ messages, agent, onStateChange }: ArtifactPreviewProps) {
+export function ArtifactPreview({ messages, agent, onStateChange, yieldTo }: ArtifactPreviewProps) {
   const { versions, selected, open, select, show, hide } = useArtifactVersions(
     messages,
     onStateChange,
+    yieldTo,
   );
   const page = useArtifactHtml(open && selected ? artifactUrl(agent, selected) : undefined);
 

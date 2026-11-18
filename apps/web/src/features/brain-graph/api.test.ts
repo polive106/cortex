@@ -2,11 +2,17 @@ import type { EveMessage } from "eve/react";
 import { describe, expect, it } from "vitest";
 import {
   brainGraphUrl,
+  brainPageUrl,
   brainTrail,
   neighbours,
   nodeRadius,
   nodeSlug,
   parseBrainGraph,
+  parseBrainPage,
+  READER_LINK_TAG,
+  readerLink,
+  readerTarget,
+  rehypeReaderLinks,
 } from "./api";
 
 const node = (id: string, kind = "page") => ({ id, title: id, summary: "", kind, degree: 1 });
@@ -158,5 +164,75 @@ describe("brainTrail", () => {
       tool(callId, "write_page", "completed", {}, { committed: true, changes: [], ref });
     expect(brainTrail(conversation(write("w1", "a"), write("w2", "b"))).written).toBe("b");
     expect(brainTrail(conversation(write("w1"))).written).toBeUndefined();
+  });
+});
+
+describe("brain reader api", () => {
+  const step = (path: string, action: "read" | "search" | "write") =>
+    ({ id: `${path}:${action}`, path, action, active: false }) as const;
+
+  it("builds the page URL", () => {
+    expect(brainPageUrl("companion", "wiki/team/on-call.md")).toBe(
+      "/eve/companion/brain/page?path=wiki%2Fteam%2Fon-call.md",
+    );
+  });
+
+  it("parses a page body and refuses anything else", () => {
+    const page = {
+      ok: true,
+      ref: "r1",
+      path: "wiki/a.md",
+      title: "A",
+      summary: "s",
+      updated: "2026-11-10",
+      body: "# A",
+    };
+    expect(parseBrainPage(page)).toEqual({
+      ref: "r1",
+      path: "wiki/a.md",
+      title: "A",
+      summary: "s",
+      updated: "2026-11-10",
+      body: "# A",
+    });
+    expect(parseBrainPage({ ...page, body: 1 })).toBeUndefined();
+    expect(parseBrainPage(null)).toBeUndefined();
+  });
+
+  it("follows the page the agent last read or wrote, not what it found", () => {
+    expect(readerTarget([])).toBeUndefined();
+    expect(
+      readerTarget([
+        step("wiki/a.md", "read"),
+        step("wiki/b.md", "write"),
+        step("wiki/c.md", "search"),
+      ]),
+    ).toBe("wiki/b.md");
+  });
+
+  it("resolves a link in a page to another page of the brain", () => {
+    expect(readerLink("wiki/team/on-call.md", "../deploys.md")).toBe("wiki/deploys.md");
+    expect(readerLink("index.md", "wiki/deploys.md#x")).toBe("wiki/deploys.md");
+    expect(readerLink("wiki/a.md", "/index.md")).toBe("index.md");
+    expect(readerLink("wiki/a.md", "../raw/2026-11-10-x.md")).toBeUndefined();
+    expect(readerLink("wiki/a.md", "Bad Name.md")).toBeUndefined();
+    expect(readerLink("wiki/a.md", "https://example.com")).toBeUndefined();
+  });
+
+  it("turns page links into reader links, after sanitizing", () => {
+    const tree = {
+      type: "root",
+      children: [
+        { type: "element", tagName: "a", properties: { href: "b.md" }, children: [] },
+        { type: "element", tagName: "a", properties: { href: "https://x.dev" }, children: [] },
+        { type: "element", tagName: "a", properties: {} },
+      ],
+    };
+    rehypeReaderLinks("wiki/a.md")()(tree);
+    expect(tree.children.map((child) => [child.tagName, child.properties])).toEqual([
+      [READER_LINK_TAG, { path: "wiki/b.md" }],
+      ["a", { href: "https://x.dev" }],
+      ["a", {}],
+    ]);
   });
 });

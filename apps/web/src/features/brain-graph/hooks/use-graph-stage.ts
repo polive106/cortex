@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react";
-import { brainFileUrl } from "@/lib/brain-location";
 import type { GraphEdge, GraphNode } from "../api";
 import type { BrainGraphCanvasProps } from "../widgets/brain-graph-canvas";
 import { useForceLayout } from "./use-force-layout";
@@ -9,7 +8,7 @@ import { type GraphViewport, useGraphViewport } from "./use-graph-viewport";
 /** What the canvas needs from the stage; the view adds the graph data and the trail. */
 export type StageCanvasProps = Omit<
   BrainGraphCanvasProps,
-  "nodes" | "edges" | "fresh" | "trail" | "quiet"
+  "nodes" | "edges" | "fresh" | "trail" | "quiet" | "onOpen"
 >;
 
 export interface GraphStage {
@@ -33,13 +32,7 @@ export function useGraphStage(
   const viewport = useGraphViewport(layout);
   const focus = useGraphFocus(nodes, edges);
 
-  const { isClick, centreOn } = viewport;
-  const onOpen = useCallback(
-    (id: string) => {
-      if (isClick()) window.open(brainFileUrl(id), "_blank", "noopener,noreferrer");
-    },
-    [isClick],
-  );
+  const { centreOn } = viewport;
   const { positions } = layout;
   const focusBestMatch = useCallback(() => {
     const point = focus.matches[0] && positions.get(focus.matches[0]);
@@ -56,7 +49,6 @@ export function useGraphStage(
       highlighted: focus.highlighted,
       hovered: focus.hovered,
       onHover: focus.setHovered,
-      onOpen,
       onWheel: viewport.onWheel,
       onPointerDown: viewport.onPointerDown,
       onPointerMove: viewport.onPointerMove,
@@ -75,7 +67,6 @@ export function useGraphStage(
       focus.highlighted,
       focus.hovered,
       focus.setHovered,
-      onOpen,
     ],
   );
 

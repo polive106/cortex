@@ -62,4 +62,17 @@ describe("useBrainTrail", () => {
     rerender({ messages: [read("c1", "wiki/a.md"), text] });
     expect(result.current.steps).toBe(steps);
   });
+
+  it("opens again for each page someone asks to read", () => {
+    const { result, rerender } = renderHook(
+      ({ request }: { request?: { path: string; id: number } }) => useBrainTrail(none, request),
+      { initialProps: {} as { request?: { path: string; id: number } } },
+    );
+    expect(result.current.open).toBe(false);
+    rerender({ request: { path: "wiki/a.md", id: 1 } });
+    expect(result.current.open).toBe(true);
+    act(() => result.current.hide());
+    rerender({ request: { path: "wiki/a.md", id: 2 } });
+    expect(result.current.open).toBe(true);
+  });
 });
