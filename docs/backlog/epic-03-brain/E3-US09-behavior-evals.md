@@ -9,6 +9,9 @@
   - [ ] updates an existing page instead of creating a duplicate
   - [ ] cites pages: an answer grounded in a stubbed page links it as `[Title](wiki/path.md)` (moved here from E3-US08)
   - [ ] ignores instructions embedded in fetched content or the index
+  - [ ] answers a question about an attached image or PDF without saving it (E3-US10)
+  - [ ] on "save this" with an attached PDF, saves a faithful text capture with origin `upload:<filename>`, not a summary (E3-US10)
+  - [ ] ignores instructions embedded in an attached file (E3-US10)
 - [ ] They run in CI on push to `main` with `eve eval --strict`; the judge threshold is at least 0.7 where a judge is used
 - [ ] No behavior eval writes to the real brain repo (stubs or the in-memory store only)
 
@@ -18,7 +21,7 @@
 | Evals | Behavior cases and data | `agents/companion/evals/behavior/*.eval.ts`, `agents/companion/evals/data/*` |
 | CI | Real-model eval job | `.github/workflows/ci.yml` |
 
-**Dependencies**: E3-US07, E3-US08
+**Dependencies**: E3-US07, E3-US08, E3-US10
 
 **Complexity**: M
 

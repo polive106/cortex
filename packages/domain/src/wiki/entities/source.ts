@@ -5,7 +5,7 @@ import { oneLine } from "./text";
 export interface SourceProps {
   readonly path: SourcePath;
   readonly title: string;
-  /** Where it came from: a URL, "pasted", or a Slack permalink. */
+  /** Where it came from: a URL, "pasted", `upload:<file name>` (E3-US10), or a Slack permalink. */
   readonly origin: string;
   /** YYYY-MM-DD it was captured. */
   readonly captured: string;

@@ -36,6 +36,13 @@ import { replaceSessionRoute } from "@/lib/session-route";
 import type { SidePanelState } from "@/lib/side-panel";
 import { cn } from "@/lib/utils";
 import { ArtifactPreview } from "@/src/features/artifacts";
+import {
+  ATTACHMENT_ACCEPT,
+  ATTACHMENT_MAX_BYTES,
+  ATTACHMENT_MAX_FILES,
+  ComposerAttachments,
+  useAttachmentError,
+} from "@/src/features/attachments";
 import { BrainTrailPreview } from "@/src/features/brain-graph";
 import { SessionHistory } from "@/src/features/sessions";
 import { AgentMessage } from "./agent-message";
@@ -59,6 +66,7 @@ export function AgentChat({
     (path: string) => setPageRequest((last) => ({ path, id: (last?.id ?? 0) + 1 })),
     [],
   );
+  const attachmentError = useAttachmentError();
   const hasSubmittedMessage = useRef(false);
   const syncSessionRoute = (nextSessionId: string) => {
     if (sessionId !== undefined) return;
@@ -136,6 +144,7 @@ export function AgentChat({
 
     setHasInputText(false);
     setCancellationError(undefined);
+    attachmentError.dismiss();
     hasSubmittedMessage.current = true;
     if (agent.session !== undefined) syncSessionRoute(agent.session.sessionId);
     const options = turnOpen ? { turnPolicy: "steer" as const } : undefined;
@@ -162,7 +171,18 @@ export function AgentChat({
   };
 
   const composer = (
-    <PromptInput onSubmit={handleSubmit}>
+    <PromptInput
+      accept={ATTACHMENT_ACCEPT}
+      maxFileSize={ATTACHMENT_MAX_BYTES}
+      maxFiles={ATTACHMENT_MAX_FILES}
+      onError={attachmentError.report}
+      onSubmit={handleSubmit}
+    >
+      <ComposerAttachments
+        disabled={isResuming}
+        error={attachmentError.message}
+        onDismissError={attachmentError.dismiss}
+      />
       <PromptInputTextarea
         data-testid="chat-input-message"
         disabled={isResuming}

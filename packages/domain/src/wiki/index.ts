@@ -1,4 +1,10 @@
 export {
+  ATTACHMENT_MAX_BYTES,
+  ATTACHMENT_MAX_FILES,
+  ATTACHMENT_MEDIA_TYPES,
+  uploadOrigin,
+} from "./entities/attachment";
+export {
   BrainGraph,
   type GraphEdge,
   type GraphNode,
