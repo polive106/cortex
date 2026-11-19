@@ -7,6 +7,7 @@
 - [ ] The raw source is saved as `raw/YYYY-MM-DD-slack-<channel>-<slug>.md` with participants shown as display names (no emails)
 - [ ] It proposes page creates or updates through the normal `write_page` approval
 - [ ] Threads from private channels need explicit confirmation before saving
+- [ ] Images and PDFs attached in the thread are captured as text in the raw source, as in the web chat (E3-US10); originals are not stored
 - [ ] Unit tests for thread-to-Markdown conversion; a flow eval for the propose → approve path
 
 **Technical Tasks**:

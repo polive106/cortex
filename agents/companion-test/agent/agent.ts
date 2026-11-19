@@ -1,3 +1,4 @@
+import { uploadOrigin } from "@cortex/domain";
 import { defineAgent } from "eve";
 import { type MockModelRequest, type MockModelResponse, mockModel } from "eve/evals";
 
@@ -15,9 +16,32 @@ import { type MockModelRequest, type MockModelResponse, mockModel } from "eve/ev
 // - "make artifact <slug>" / "revise artifact <slug>" write artifacts/<slug>/index.html with bash,
 //   then call publish_artifact (E5-US07);
 // - "publish missing" calls publish_artifact for a slug with no page in the sandbox;
+// - "save attachment" with a file attached calls write_page with origin upload:<file name>, and
+//   "what is attached" names the file without saving (E3-US10);
 // - anything else gets an echo.
 
 type Reply = MockModelResponse | string;
+
+/** eve labels each attached file in the user message: `Attached file <path> (<media type>)`. */
+const ATTACHED_LABEL = "Attached file ";
+const ATTACHED = new RegExp(`${ATTACHED_LABEL}(.+?) \\(([\\w.+-]+/[\\w.+-]+)\\)`);
+
+/** The latest attachment in the prompt: its file name and media type. */
+function attachment(messages: MockModelRequest["messages"]) {
+  for (const { text } of messages.toReversed()) {
+    const [, path = "", type = ""] = text.match(ATTACHED) ?? [];
+    if (path) return { name: uploadOrigin(path).slice("upload:".length), type };
+  }
+  return undefined;
+}
+
+/** Saves an attachment. The double can't read the file, so its capture is a stand-in. */
+function saveAttachment({ name, type }: { name: string; type: string }): Reply {
+  const title = name.replace(/\.[^.]+$/, "");
+  const source = { title, origin: `upload:${name}`, text: `Capture of ${name} (${type}).` };
+  const page = { title, summary: `From ${name}`, body: `Captured from ${name}.\n` };
+  return { toolCalls: [{ name: "write_page", input: { source, pages: [page] } }] };
+}
 
 /** A small artifact page; each revision says which one it is. */
 const artifactPage = (slug: string, revision: string) =>
@@ -85,7 +109,9 @@ function afterTool(
 }
 
 function respond({ lastUserMessage, messages, toolResults }: MockModelRequest): Reply {
-  const message = (lastUserMessage ?? "").trim().toLowerCase();
+  // The typed text, without the labels eve appends for attached files.
+  const typed = (lastUserMessage ?? "").split(ATTACHED_LABEL)[0] ?? "";
+  const message = typed.trim().toLowerCase();
   const [verb, kind, word = ""] = message.split(/\s+/);
   const lastResult = toolResults.at(-1);
   if (messages.at(-1)?.role === "tool" && lastResult) {
@@ -93,6 +119,12 @@ function respond({ lastUserMessage, messages, toolResults }: MockModelRequest): 
   }
 
   if (message === "ping") return "pong";
+  if (message === "save attachment" || message === "what is attached") {
+    const file = attachment(messages);
+    if (!file) return "No file is attached.";
+    if (message === "what is attached") return `Attached: ${file.name} (${file.type})`;
+    return saveAttachment(file);
+  }
   if (message === "demo approval") {
     return { toolCalls: [{ name: "demo_action", input: { label: "demo" } }] };
   }

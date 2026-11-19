@@ -16,7 +16,7 @@ cortex is a home for several eve agents that share one **brain**: a Karpathy-sty
 | Concept | Description |
 |---------|-------------|
 | **Page** | A Markdown file under `wiki/` in the brain: a title, a body, and links to other pages and sources |
-| **Source** | An immutable original kept under `raw/YYYY-MM-DD-<slug>.md`: pasted text, a fetched URL, or a Slack thread |
+| **Source** | An immutable original kept under `raw/YYYY-MM-DD-<slug>.md`: pasted text, a fetched URL, a text capture of an uploaded PDF or image, or a Slack thread |
 | **IndexEntry** | One line in `index.md`: page path, title, one-line summary |
 | **LogEntry** | One append-only line in `log.md`: date, operation (ingest/query/lint), summary, commit |
 | **Changeset** | The full set of file writes for one ingest: source, pages, index, log. Applied as **one commit** |
@@ -81,15 +81,16 @@ out/        HTML artifacts, optionally grouped by project
 28. E6-US02: session recording hook and sessions route
 29. E6-US03: session sidebar with rename and delete
 30. E3-US08: citations in answers and the web UI
-31. E3-US09: real-model behavior evals
-32. E4-US01: Slack channel via Vercel Connect
-33. E4-US02: mentions and DMs
-34. E4-US03: approvals in Slack
-35. E4-US04: "save this thread" ingestion
-36. E7-US01: live brain graph screen (ADR-0015)
-37. E7-US02: agent trail on the brain graph
-38. E7-US03: follow the agent in the brain panel
-39. E7-US04: read brain pages beside the graph (ADR-0016)
+31. E7-US01: live brain graph screen (ADR-0015)
+32. E7-US02: agent trail on the brain graph
+33. E7-US03: follow the agent in the brain panel
+34. E7-US04: read brain pages beside the graph (ADR-0016)
+35. E3-US10: PDF and image attachments in web chat (before E3-US09, so the behavior evals cover attachments)
+36. E3-US09: real-model behavior evals
+37. E4-US01: Slack channel via Vercel Connect
+38. E4-US02: mentions and DMs
+39. E4-US03: approvals in Slack
+40. E4-US04: "save this thread" ingestion
 
 ## Later / ideas (not yet stories)
 
