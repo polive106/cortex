@@ -23,6 +23,6 @@ test.describe("brain graph", () => {
       chat.page.getByText(new RegExp(`Saved: create wiki/note-${word}\\.md`)),
     ).toBeVisible();
 
-    await expect(graph.getByTestId(`brain-node-note-${word}`)).toBeVisible({ timeout: 15_000 });
+    await expect(graph.getByTestId(`brain-node-note-${word}`)).toBeVisible();
   });
 });

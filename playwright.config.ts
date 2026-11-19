@@ -10,6 +10,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
+  // Every reply is an agent turn on vercel dev (a route may compile on first use, the sandbox
+  // starts per session). On a shared CI runner that often takes longer than Playwright's 5 s.
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",

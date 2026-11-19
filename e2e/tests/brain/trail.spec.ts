@@ -35,7 +35,7 @@ test.describe("brain trail", () => {
     const word = `trail${Date.now()}`;
     await chat.send(`save note ${word}`);
     const node = chat.page.getByTestId("chat-panel-brain").getByTestId(`brain-node-note-${word}`);
-    await expect(node).toBeVisible({ timeout: 15_000 });
+    await expect(node).toBeVisible();
     await expect(node.getByTestId("brain-ring-latest")).toBeVisible();
   });
 });
