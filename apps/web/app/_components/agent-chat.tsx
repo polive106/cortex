@@ -227,7 +227,7 @@ export function AgentChat({
           >
             <ConversationTopFade className="top-14" />
             <BrainReaderContext.Provider value={openBrainPage}>
-              <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-36 sm:px-6">
+              <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 pt-20 pb-8 sm:px-6">
                 {agent.messages.map((message, index) =>
                   showPendingThinking &&
                   isPendingAssistantShell &&
@@ -262,7 +262,9 @@ export function AgentChat({
           className={cn(
             "mx-auto w-full px-4 sm:px-6",
             showConversationLayout
-              ? "absolute bottom-0 left-1/2 z-20 max-w-3xl -translate-x-1/2 bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6"
+              ? // In the flow, not over the conversation: the chat always ends above the composer,
+                // however tall it grows. The negative margin lets the fade overlap the last lines.
+                "relative z-20 -mt-6 max-w-3xl shrink-0 bg-gradient-to-t from-background via-background to-transparent pt-6 pb-6"
               : "flex max-w-xl flex-1 flex-col items-center justify-center gap-8 pb-[10vh]",
           )}
         >
