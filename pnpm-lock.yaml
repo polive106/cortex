@@ -43,7 +43,7 @@ importers:
         version: 4.3.0
       '@vercel/connect':
         specifier: 2.7.0
-        version: 2.7.0(ai@7.0.173(zod@4.6.7))(better-auth@1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0))(eve@1.0.0-rc.17)
+        version: 2.7.0(ai@7.0.173(zod@4.6.7))(better-auth@1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0))(eve@1.0.2(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1)))
       ai:
         specifier: ^7.0.172
         version: 7.0.173(zod@4.6.7)
@@ -60,8 +60,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       eve:
-        specifier: ^1.0.0-rc.17
-        version: 1.0.0-rc.17(@vercel/connect@2.7.0)(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1))
+        specifier: ^1.0.2
+        version: 1.0.2(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1))
       lucide-react:
         specifier: 1.16.0
         version: 1.16.0(react@19.2.6)
@@ -927,6 +927,13 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || 2.0.0-beta.2
       '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2
+
+  '@napi-rs/wasm-runtime@1.2.7':
+    resolution: {integrity: sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=23.5.0}
+    peerDependencies:
+      '@emnapi/core': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
+      '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
 
   '@next/env@16.4.1':
     resolution: {integrity: sha512-5sUUrrSvs/2/2LnLoesybMGx12EtPB46fdZ6RhAw0XDGSPxU2LFyQBB7yuEiOFFJPKmBY6+q2jTr1/AMbnp0/g==}
@@ -2454,8 +2461,8 @@ packages:
   '@ts-morph/common@0.11.1':
     resolution: {integrity: sha512-7hWZS0NRpEsNV8vWJzg7FEz6V8MaLNeJOmwmghqUXTpzk16V1LLZhdo+4QvE/+zv4cVci0OviuJFnqhEfoV3+g==}
 
-  '@tybys/wasm-util@0.10.4':
-    resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
+  '@tybys/wasm-util@0.10.5':
+    resolution: {integrity: sha512-dOGOPxlaNV+G046mZzN+9C0dAcQZeSKcXiVaM0TYy/LM4ttTmgSBDxYfovcYI8Em3+eAbiAYpvWLOv8+ZVRJKA==}
 
   '@types/aria-query@5.0.4':
     resolution: {integrity: sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==}
@@ -3658,8 +3665,8 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  eve@1.0.0-rc.17:
-    resolution: {integrity: sha512-B06xjUcbDZ3c09GHorde8Ww1P7IijKXzwVaKv1ntk2PxTr804glczF6uQ6MLgHVyO/cNU6nN8lv5J6MHDCfcIg==}
+  eve@1.0.2:
+    resolution: {integrity: sha512-isoZ/zG5En2xyJ3/6X2hjw6NlaBv82rvY/NmawK9iAZ+7Fdt1xA+RWGvnT7qzTHbOzuQop5rPKJSHavtRvJK/Q==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -3667,7 +3674,6 @@ packages:
       '@nuxt/kit': ^4.0.0
       '@nuxt/schema': ^4.0.0
       '@opentelemetry/api': ^1.0.0
-      '@vercel/connect': ^2.7.0
       ai: ^7.0.172
       braintrust: ^3.0.0
       chat: ^4.42.0
@@ -3686,8 +3692,6 @@ packages:
       '@nuxt/schema':
         optional: true
       '@opentelemetry/api':
-        optional: true
-      '@vercel/connect':
         optional: true
       braintrust:
         optional: true
@@ -6240,7 +6244,14 @@ snapshots:
     dependencies:
       '@emnapi/core': 2.0.0-beta.2
       '@emnapi/runtime': 2.0.0-beta.2
-      '@tybys/wasm-util': 0.10.4
+      '@tybys/wasm-util': 0.10.5
+    optional: true
+
+  '@napi-rs/wasm-runtime@1.2.7(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)':
+    dependencies:
+      '@emnapi/core': 2.0.0-beta.2
+      '@emnapi/runtime': 2.0.0-beta.2
+      '@tybys/wasm-util': 0.10.5
     optional: true
 
   '@next/env@16.4.1': {}
@@ -6339,7 +6350,7 @@ snapshots:
 
   '@oxc-parser/binding-wasm32-wasi@0.121.0(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.2.6(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
+      '@napi-rs/wasm-runtime': 1.2.7(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -6412,7 +6423,7 @@ snapshots:
 
   '@oxc-transform/binding-wasm32-wasi@0.111.0(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.2.6(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
+      '@napi-rs/wasm-runtime': 1.2.7(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -7288,7 +7299,7 @@ snapshots:
 
   '@rolldown/binding-wasm32-wasi@1.0.0-rc.1(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.2.6(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
+      '@napi-rs/wasm-runtime': 1.2.7(@emnapi/core@2.0.0-beta.2)(@emnapi/runtime@2.0.0-beta.2)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -7522,7 +7533,7 @@ snapshots:
       mkdirp: 1.0.4
       path-browserify: 1.0.1
 
-  '@tybys/wasm-util@0.10.4':
+  '@tybys/wasm-util@0.10.5':
     dependencies:
       tslib: 2.9.1
     optional: true
@@ -7905,13 +7916,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@vercel/connect@2.7.0(ai@7.0.173(zod@4.6.7))(better-auth@1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0))(eve@1.0.0-rc.17)':
+  '@vercel/connect@2.7.0(ai@7.0.173(zod@4.6.7))(better-auth@1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0))(eve@1.0.2(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1)))':
     dependencies:
       '@vercel/oidc': 4.0.5
     optionalDependencies:
       ai: 7.0.173(zod@4.6.7)
       better-auth: 1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0)
-      eve: 1.0.0-rc.17(@vercel/connect@2.7.0)(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1))
+      eve: 1.0.2(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1))
 
   '@vercel/container@26.0.0(@vercel/build-utils@15.4.0)':
     dependencies:
@@ -8861,14 +8872,13 @@ snapshots:
 
   etag@1.8.1: {}
 
-  eve@1.0.0-rc.17(@vercel/connect@2.7.0)(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1)):
+  eve@1.0.2(ai@7.0.173(zod@4.6.7))(just-bash@3.6.0)(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.27.0)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1)):
     dependencies:
       ai: 7.0.173(zod@4.6.7)
       nitro: 3.0.261103-rc
       rolldown: 1.3.2
       undici: 8.12.4
     optionalDependencies:
-      '@vercel/connect': 2.7.0(ai@7.0.173(zod@4.6.7))(better-auth@1.7.21(next@16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vitest@5.1.0))(eve@1.0.0-rc.17)
       just-bash: 3.6.0
       next: 16.4.1(@playwright/test@1.65.1)(@types/node@26.6.6)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react: 19.2.6
