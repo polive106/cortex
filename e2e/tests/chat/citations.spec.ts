@@ -9,7 +9,7 @@ test.describe("citations", () => {
     await expect(citation).toHaveText("Welcome to the brain");
     await expect(citation).toHaveAttribute(
       "href",
-      "https://github.com/polive106/brain/blob/main/wiki/welcome.md",
+      "https://github.com/acme/brain/blob/main/wiki/welcome.md",
     );
     await expect(citation).toHaveAttribute("target", "_blank");
   });

@@ -11,7 +11,7 @@ Probe:
 
 - **Who**: you in the web UI, a Slack user, a scheduled job, another agent?
 - **What**: exact behavior, edge cases, failure modes.
-- **Brain impact**: does it read or write the wiki? Does it change the brain schema (`AGENTS.md` in `polive106/brain`)? Does a write need approval?
+- **Brain impact**: does it read or write the wiki? Does it change the brain schema (`AGENTS.md` in the brain repo)? Does a write need approval?
 - **Security**: what secrets/credentials are involved; can the model ever see them? Who is allowed to trigger it?
 - **Cost**: extra model calls, context size, real-model evals needed?
 - **Scope**: what's explicitly out.

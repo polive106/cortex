@@ -14,7 +14,7 @@ description: Verify a story is really done (criteria, tests, evals, docs) and up
    pnpm eval
    pnpm test:e2e   # if the story touched apps/web or an agent channel
    ```
-4. Confirm docs: ADR added for any new decision, `AGENTS.md` updated for new rules/commands, brain schema (`polive106/brain` `AGENTS.md`) updated if wiki conventions changed.
+4. Confirm docs: ADR added for any new decision, `AGENTS.md` updated for new rules/commands, brain schema (the brain repo's `AGENTS.md`) updated if wiki conventions changed.
 5. Set `**Status**: Done` in the story file **and** the epic README table (hooks warn on mismatch).
 6. If every story in the epic is Done, update the epic row in `docs/backlog/README.md`.
 7. Run `review-backlog` to pick the next story.

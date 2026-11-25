@@ -2,22 +2,24 @@ import { describe, expect, it } from "vitest";
 import { brainFileUrl, brainLocation, pageName, pageSlug } from "./brain-location";
 
 describe("brainFileUrl", () => {
-  it("points at the file in the brain repo on GitHub, polive106/brain on main by default", () => {
-    expect(brainFileUrl("wiki/team/on-call.md")).toBe(
-      "https://github.com/polive106/brain/blob/main/wiki/team/on-call.md",
+  it("points at the file in the configured brain repo on GitHub, main by default", () => {
+    expect(brainFileUrl("wiki/team/on-call.md", brainLocation("acme/brain"))).toBe(
+      "https://github.com/acme/brain/blob/main/wiki/team/on-call.md",
     );
   });
 
-  it("follows the configured brain repo and branch", () => {
+  it("follows the configured branch", () => {
     const brain = brainLocation("acme/wiki", "release/1 rc");
     expect(brainFileUrl("wiki/a.md", brain)).toBe(
       "https://github.com/acme/wiki/blob/release/1%20rc/wiki/a.md",
     );
   });
 
-  it("ignores a malformed repo setting", () => {
-    expect(brainLocation("not a repo", "")).toEqual({ repo: "polive106/brain", branch: "main" });
-    expect(brainLocation("a/b/c")).toMatchObject({ repo: "polive106/brain" });
+  it("has no link without a brain repo, or with a malformed one", () => {
+    expect(brainLocation("", "")).toBeUndefined();
+    expect(brainLocation("not a repo")).toBeUndefined();
+    expect(brainLocation("a/b/c")).toBeUndefined();
+    expect(brainFileUrl("wiki/a.md", undefined)).toBeUndefined();
   });
 });
 

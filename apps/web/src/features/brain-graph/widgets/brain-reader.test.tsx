@@ -63,8 +63,28 @@ describe("BrainReader", () => {
     expect(screen.getByRole("heading", { name: "Rota" })).toBeTruthy();
     expect(screen.getByText("lead").getAttribute("data-streamdown")).toBe("strong");
     expect(screen.getByTestId("chat-link-reader-github").getAttribute("href")).toBe(
-      "https://github.com/polive106/brain/blob/main/wiki/team/on-call.md",
+      "https://github.com/acme/brain/blob/main/wiki/team/on-call.md",
     );
+  });
+
+  it("has no GitHub link without a brain repo", async () => {
+    vi.resetModules();
+    vi.stubEnv("BRAIN_REPO", "");
+    const { BrainReader: Unlinked } = await import("./brain-reader");
+    vi.unstubAllEnvs();
+    render(
+      <Unlinked
+        canGoBack={false}
+        onBack={vi.fn()}
+        onOpenPage={vi.fn()}
+        page={page("# Rota")}
+        path="wiki/team/on-call.md"
+        scope="chat"
+        status="ready"
+      />,
+    );
+    expect(screen.getByTestId("chat-text-reader-title").textContent).toBe("On-call");
+    expect(screen.queryByTestId("chat-link-reader-github")).toBeNull();
   });
 
   it("opens linked pages in the reader and leaves other links alone", () => {

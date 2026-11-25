@@ -2,7 +2,7 @@
 
 ## Vision
 
-cortex is a home for several eve agents that share one **brain**: a Karpathy-style LLM wiki kept as Markdown in a separate private GitHub repo (`polive106/brain`). The first agent, **companion**, is a chat companion. You test it first in a private web UI and later bring it into Slack. It answers from the brain, citing pages. When it sees knowledge worth keeping, it saves it as one revertable commit, and it builds HTML artifacts shown beside the chat.
+cortex is a home for several eve agents that share one **brain**: a Karpathy-style LLM wiki kept as Markdown in a separate private GitHub repo (`BRAIN_REPO`). The first agent, **companion**, is a chat companion. You test it first in a private web UI and later bring it into Slack. It answers from the brain, citing pages. When it sees knowledge worth keeping, it saves it as one revertable commit, and it builds HTML artifacts shown beside the chat.
 
 ## Principles
 
@@ -25,7 +25,7 @@ cortex is a home for several eve agents that share one **brain**: a Karpathy-sty
 | **Artifact** | A self-contained HTML page under `out/` (`out/<project>/<slug>.html` or `out/<slug>.html`), styled with the shadcn design kit. Each publish is a new version |
 | **Use-cases** | `ReadIndex`, `ReadPage`, `SearchWiki`, `ProposeIngest`, `ApplyIngest`, `PublishArtifact`, `ReadArtifact`, `ListArtifacts` |
 
-## Brain repo layout (`polive106/brain`)
+## Brain repo layout
 
 ```
 AGENTS.md   schema: conventions the agent follows when writing (recalled every turn)
