@@ -6,26 +6,24 @@ export interface BrainLocation {
   readonly branch: string;
 }
 
-const DEFAULT_REPO = "polive106/brain";
-
 /**
  * The brain the agent reads: BRAIN_REPO ("owner/repo") and BRAIN_BRANCH, which next.config.ts
- * builds into the client. Unset or malformed values fall back to polive106/brain on main.
+ * builds into the client. Unset or malformed, there is no brain on GitHub to link to.
  */
 export function brainLocation(
   repo: string | undefined = process.env.BRAIN_REPO,
   branch: string | undefined = process.env.BRAIN_BRANCH,
-): BrainLocation {
-  const brain = parseBrainRepo(repo ?? "", branch) ?? parseBrainRepo(DEFAULT_REPO, branch);
-  const { owner, name, branch: resolved } = brain as NonNullable<typeof brain>;
-  return { repo: `${owner}/${name}`, branch: resolved };
+): BrainLocation | undefined {
+  const brain = parseBrainRepo(repo ?? "", branch);
+  return brain && { repo: `${brain.owner}/${brain.name}`, branch: brain.branch };
 }
 
 /** Fixed at build time, so it's read once. */
 const BRAIN = brainLocation();
 
-/** A file of the brain (a page, index.md) on GitHub. */
-export const brainFileUrl = (path: string, brain: BrainLocation = BRAIN) =>
+/** A file of the brain (a page, index.md) on GitHub, or undefined when no brain repo is set. */
+export const brainFileUrl = (path: string, brain: BrainLocation | undefined = BRAIN) =>
+  brain &&
   `https://github.com/${brain.repo}/blob/${brain.branch.split("/").map(encodeURIComponent).join("/")}/${path}`;
 
 /** "wiki/team/on-call.md" → "team-on-call": a page's id in `data-testid`s. */

@@ -19,7 +19,7 @@ describe("citationMarkdown", () => {
     const link = screen.getByTestId("chat-link-citation-deploys");
     expect(link.textContent).toBe("Deploys");
     expect(link.getAttribute("href")).toBe(
-      "https://github.com/polive106/brain/blob/main/wiki/deploys.md",
+      "https://github.com/acme/brain/blob/main/wiki/deploys.md",
     );
   });
 

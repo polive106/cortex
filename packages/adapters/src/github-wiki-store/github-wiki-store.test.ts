@@ -15,7 +15,7 @@ afterAll(() => server.close());
 const connect = (github: FakeGitHub, token = TOKEN) =>
   new GitHubWikiStore({
     token,
-    owner: "polive106",
+    owner: "acme",
     repo: "brain",
     branch: "main",
     apiUrl: github.api,
@@ -76,14 +76,14 @@ describe("GitHubWikiStore", () => {
   it("sends the token only as a bearer header to the configured API", async () => {
     let seen: Headers | undefined;
     server.use(
-      http.get("https://api.github.test/repos/polive106/brain/contents/*", ({ request }) => {
+      http.get("https://api.github.test/repos/acme/brain/contents/*", ({ request }) => {
         seen = request.headers;
         return HttpResponse.text("x");
       }),
     );
     const store = new GitHubWikiStore({
       token: TOKEN,
-      owner: "polive106",
+      owner: "acme",
       repo: "brain",
       apiUrl: "https://api.github.test",
     });
@@ -100,18 +100,18 @@ describe("GitHubWikiStore", () => {
   it("URL-encodes each path segment", async () => {
     let path = "";
     server.use(
-      http.get("https://api.github.test/repos/polive106/brain/contents/*", ({ request }) => {
+      http.get("https://api.github.test/repos/acme/brain/contents/*", ({ request }) => {
         path = new URL(request.url).pathname;
         return HttpResponse.text("x");
       }),
     );
     await connect(new FakeGitHub(TOKEN, {})).readFile("wiki/a b#c.md");
-    expect(path).toBe("/repos/polive106/brain/contents/wiki/a%20b%23c.md");
+    expect(path).toBe("/repos/acme/brain/contents/wiki/a%20b%23c.md");
   });
 
   it("fails loudly when GitHub truncates the tree listing", async () => {
     server.use(
-      http.get("https://api.github.test/repos/polive106/brain/git/trees/:ref", () =>
+      http.get("https://api.github.test/repos/acme/brain/git/trees/:ref", () =>
         HttpResponse.json({ truncated: true, tree: [] }),
       ),
     );
@@ -120,7 +120,7 @@ describe("GitHubWikiStore", () => {
 
   it("reports other failures without the token hint", async () => {
     server.use(
-      http.get("https://api.github.test/repos/polive106/brain/contents/*", () =>
+      http.get("https://api.github.test/repos/acme/brain/contents/*", () =>
         HttpResponse.json({ message: "boom" }, { status: 500 }),
       ),
     );
@@ -132,7 +132,7 @@ describe("GitHubWikiStore", () => {
   it("skips a page that disappears between listing and reading", async () => {
     const github = fakeGitHub();
     server.use(
-      http.get("https://api.github.test/repos/polive106/brain/contents/wiki/people/ada.md", () =>
+      http.get("https://api.github.test/repos/acme/brain/contents/wiki/people/ada.md", () =>
         HttpResponse.json({ message: "Not Found" }, { status: 404 }),
       ),
     );

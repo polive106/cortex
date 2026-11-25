@@ -56,6 +56,7 @@ export function BrainReader({
 }: BrainReaderProps) {
   const current = page?.path === path ? page : undefined;
   const title = current?.title ?? (path === undefined ? "Reader" : pageName(path));
+  const githubUrl = path && brainFileUrl(path);
   return (
     <section
       aria-busy={status === "loading"}
@@ -94,12 +95,12 @@ export function BrainReader({
             </p>
           ) : null}
         </div>
-        {path ? (
+        {githubUrl ? (
           <Button asChild className={HEADER_BUTTON} size="icon-sm" variant="ghost">
             <a
               aria-label="Open this page on GitHub"
               data-testid={`${scope}-link-reader-github`}
-              href={brainFileUrl(path)}
+              href={githubUrl}
               rel="noreferrer"
               target="_blank"
             >

@@ -3,7 +3,7 @@
 **User Story**: As the owner, I want a private brain repo with a clear schema so that both the agent and I know how knowledge is organized.
 
 **Acceptance Criteria**:
-- [x] Private repo `polive106/brain` exists with `AGENTS.md`, `index.md`, `log.md`, `raw/.gitkeep`, `wiki/.gitkeep`
+- [x] A private brain repo exists with `AGENTS.md`, `index.md`, `log.md`, `raw/.gitkeep`, `wiki/.gitkeep`
 - [x] Brain `AGENTS.md` defines:
   - [x] page naming (kebab-case slugs under `wiki/`, optional subfolders by kind)
   - [x] page frontmatter (title, summary, sources, updated)
@@ -12,13 +12,13 @@
   - [x] the index line format
   - [x] the log line format (`## [YYYY-MM-DD] ingest | <title>`)
   - [x] "never store secrets"
-- [x] A fine-grained token limited to `polive106/brain` with Contents read/write is created by the owner and stored as `BRAIN_GITHUB_TOKEN` in Vercel; it's never committed
-- [x] `BRAIN_REPO=polive106/brain` and `BRAIN_BRANCH=main` are documented in `AGENTS.md`
+- [x] A fine-grained token limited to the brain repo with Contents read/write is created by the owner and stored as `BRAIN_GITHUB_TOKEN` in Vercel; it's never committed
+- [x] `BRAIN_REPO` (`owner/repo`) and `BRAIN_BRANCH` (default `main`) are documented in `AGENTS.md`
 
 **Technical Tasks**:
 | Layer | Task | File(s) |
 |-------|------|---------|
-| Brain | Initial files and schema | `polive106/brain`: `AGENTS.md`, `index.md`, `log.md`, `raw/`, `wiki/` |
+| Brain | Initial files and schema | brain repo: `AGENTS.md`, `index.md`, `log.md`, `raw/`, `wiki/` |
 | Docs | Env vars and brain conventions pointer | `AGENTS.md` (cortex) |
 
 **Dependencies**: E1-US05
@@ -28,7 +28,7 @@
 **Status**: Done
 
 **Notes (2026-11-14)**:
-- **Repo:** `polive106/brain` was created private and bootstrapped from `agents/companion/agent/lib/starter-brain.ts`, the same files that seed the in-memory brain.
+- **Repo:** the brain repo was created private and bootstrapped from `agents/companion/agent/lib/starter-brain.ts`, the same files that seed the in-memory brain.
   - Instead of `wiki/.gitkeep`, the bootstrap ships `wiki/welcome.md`, which `index.md` lists.
 - **Token:** created by the owner, limited to the repo, with Contents read/write.
   - Verified: 200 on `brain`, push permission granted, 404 on `cortex`.

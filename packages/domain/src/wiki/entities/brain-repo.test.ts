@@ -3,8 +3,8 @@ import { parseBrainRepo } from "./brain-repo";
 
 describe("parseBrainRepo", () => {
   it("reads owner/repo, with main as the default branch", () => {
-    expect(parseBrainRepo("polive106/brain")).toEqual({
-      owner: "polive106",
+    expect(parseBrainRepo("acme/brain")).toEqual({
+      owner: "acme",
       name: "brain",
       branch: "main",
     });

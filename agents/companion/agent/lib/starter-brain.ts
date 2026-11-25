@@ -1,6 +1,6 @@
 /**
  * The brain's starting files (E3-US01). They seed the in-memory store until the real
- * `polive106/brain` repo exists, and the bootstrap pushes the same files there.
+ * brain repo exists, and the bootstrap pushes the same files there.
  */
 
 const SCHEMA = `# Brain schema

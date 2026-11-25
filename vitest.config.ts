@@ -21,6 +21,8 @@ export default defineConfig({
           name: "web-features",
           include: ["apps/web/src/**/*.test.{ts,tsx}"],
           environment: "happy-dom",
+          // A placeholder brain repo, so citations and the reader have a GitHub link to show.
+          env: { BRAIN_REPO: "acme/brain" },
         },
       },
       { test: { name: "agents", include: ["agents/*/agent/**/*.test.ts"] } },

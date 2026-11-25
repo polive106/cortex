@@ -1,6 +1,6 @@
 # E3: Brain (Karpathy LLM wiki)
 
-The companion reads from and writes to (without approval, ADR-0011) a Karpathy-style LLM wiki in the private `polive106/brain` repo:
+The companion reads from and writes to (without approval, ADR-0011) a Karpathy-style LLM wiki in a private brain repo (`BRAIN_REPO`):
 - `AGENTS.md` and `index.md` are recalled every turn, and pages are opened on demand.
 - Answers cite pages.
 - Ingestion (pasted text, a URL, or an attached PDF or image) saves the raw source, merges it into pages, updates the index and log, and commits once to `main`.

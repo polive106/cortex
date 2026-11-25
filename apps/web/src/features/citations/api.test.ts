@@ -19,7 +19,7 @@ describe("citationPath", () => {
     "wiki/deploys",
     "raw/2026-11-16-x.md",
     "/wiki/deploys.md",
-    "https://github.com/polive106/brain/blob/main/wiki/deploys.md",
+    "https://github.com/acme/brain/blob/main/wiki/deploys.md",
     "wiki/deploys.md?x=1",
     "wiki//deploys.md",
   ])("refuses %s", (href) => {
@@ -28,9 +28,9 @@ describe("citationPath", () => {
 });
 
 describe("citation links", () => {
-  it("point at the page in the brain repo on GitHub, polive106/brain on main by default", () => {
+  it("point at the page in the configured brain repo on GitHub", () => {
     expect(citationUrl("wiki/team/on-call.md")).toBe(
-      "https://github.com/polive106/brain/blob/main/wiki/team/on-call.md",
+      "https://github.com/acme/brain/blob/main/wiki/team/on-call.md",
     );
   });
 

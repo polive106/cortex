@@ -84,7 +84,7 @@ describe("createContainer", () => {
   });
 
   it("uses GitHub when both BRAIN_GITHUB_TOKEN and BRAIN_REPO are set", () => {
-    const c = createContainer({ BRAIN_GITHUB_TOKEN: "t", BRAIN_REPO: "polive106/brain" });
+    const c = createContainer({ BRAIN_GITHUB_TOKEN: "t", BRAIN_REPO: "acme/brain" });
     expect(c.wikiStore).toBeInstanceOf(GitHubWikiStore);
   });
 
@@ -96,7 +96,7 @@ describe("createContainer", () => {
   });
 
   it("BRAIN_STORE=memory forces the in-memory brain even with GitHub settings", () => {
-    const env = { BRAIN_GITHUB_TOKEN: "t", BRAIN_REPO: "polive106/brain", BRAIN_STORE: "memory" };
+    const env = { BRAIN_GITHUB_TOKEN: "t", BRAIN_REPO: "acme/brain", BRAIN_STORE: "memory" };
     expect(createContainer(env).wikiStore).toBeInstanceOf(InMemoryWikiStore);
   });
 

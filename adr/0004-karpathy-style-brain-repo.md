@@ -10,7 +10,7 @@ Agents need a shared, durable knowledge base that people can read and correct. e
 
 ## Decision
 
-The **brain** is a Markdown wiki following Karpathy's "LLM Wiki" pattern, in the private repo **`polive106/brain`**:
+The **brain** is a Markdown wiki following Karpathy's "LLM Wiki" pattern, in its own **private GitHub repo** (`BRAIN_REPO`):
 
 - `AGENTS.md`: the schema and conventions the agent follows.
 - `index.md`: a catalog of every page with a one-line summary.

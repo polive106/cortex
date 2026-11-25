@@ -33,6 +33,8 @@ export default defineConfig({
       BRAIN_STORE: "memory",
       SESSIONS_STORE: "memory",
       SOURCE_FETCHER: "memory",
+      // A placeholder repo for citation links; the brain itself stays in memory.
+      BRAIN_REPO: "acme/brain",
     },
     url: `http://localhost:${PORT}/eve/companion-test/v1/health`,
     reuseExistingServer: !process.env.CI,

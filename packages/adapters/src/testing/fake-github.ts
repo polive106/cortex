@@ -20,7 +20,7 @@ export class FakeGitHub {
   constructor(
     readonly token: string,
     seed: Record<string, string>,
-    readonly owner = "polive106",
+    readonly owner = "acme",
     readonly repo = "brain",
     readonly branch = "main",
   ) {
